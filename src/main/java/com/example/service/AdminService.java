@@ -4,50 +4,50 @@ import com.example.DTO.AdminUserDTO;
 import com.example.enums.Role;
 import com.example.entity.AdminUser;
 import com.example.repository.SystemUserRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class AdminService
-{
-    @Autowired
-    private SystemUserRepository systemUserRepository;
+public class AdminService {
 
+    private final SystemUserRepository systemUserRepository;
 
-    public List<AdminUserDTO> getAllUsers(){
+    // ✅ Constructor injection (recommended and warning-free)
+    public AdminService(SystemUserRepository systemUserRepository) {
+        this.systemUserRepository = systemUserRepository;
+    }
+
+    public List<AdminUserDTO> getAllUsers() {
         return systemUserRepository.findAll()
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public void blockUser(Long id){
+    public void blockUser(Long id) {
         AdminUser user = systemUserRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("user not found"));
-                user.setIsActive(false);
+        user.setIsActive(false);
         systemUserRepository.save(user);
     }
 
-    public void unBlockUser(Long id){
+    public void unBlockUser(Long id) {
         AdminUser user = systemUserRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("user not found"));
-                user.setIsActive(true);
+        user.setIsActive(true);
         systemUserRepository.save(user);
     }
 
-    public List<AdminUserDTO> findByRole(Role role){
+    public List<AdminUserDTO> findByRole(Role role) {
         return systemUserRepository.findByRole(role)
                 .stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    public AdminUserDTO updateStatus(
-            String email,
-            boolean isActive) {
+    public AdminUserDTO updateStatus(String email, boolean isActive) {
         AdminUser user = systemUserRepository.findByEmail(email);
         if (user == null) {
             throw new RuntimeException("user not found");
@@ -64,6 +64,7 @@ public class AdminService
                 user.getName(),
                 user.getEmail(),
                 user.getRole(),
-                user.getIsActive());
+                user.getIsActive()
+        );
     }
 }

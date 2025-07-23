@@ -1,5 +1,6 @@
 package com.example.zidio;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -17,6 +18,9 @@ public class ZidioApplication {
 	public static void main(String[] args) {
 		SpringApplication.run(ZidioApplication.class, args);
 	}
+
+	@Autowired
+	private RestTemplate restTemplate;
 
 	@Bean
 	public RestTemplate restTemplate() {

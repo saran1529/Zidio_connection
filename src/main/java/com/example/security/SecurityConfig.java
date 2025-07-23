@@ -29,10 +29,11 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/students/**",
                                 "/api/recruiters/**",
-                                "/api/jobPosts/**,",
+                                "/api/jobPosts/**",
                                 "/api/applications/**",
                                 "/api/notify/**",
-                                "/api/upload/**").permitAll()
+                                "/api/upload/**"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))

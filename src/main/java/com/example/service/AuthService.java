@@ -3,7 +3,6 @@ package com.example.service;
 import com.example.entity.User;
 import com.example.repository.UserRepository;
 import com.example.security.JWTUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -14,14 +13,16 @@ import java.util.Optional;
 @Service
 public class AuthService {
 
-    @Autowired
-    private UserRepository userRepository;
+    private final UserRepository userRepository;
+    private final JWTUtil jwtUtil;
+    private final PasswordEncoder passwordEncoder;
 
-    @Autowired
-    private JWTUtil jwtUtil;
-
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+    // ✅ Constructor Injection (removes all field assignment warnings)
+    public AuthService(UserRepository userRepository, JWTUtil jwtUtil, PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
+        this.jwtUtil = jwtUtil;
+        this.passwordEncoder = passwordEncoder;
+    }
 
     public ResponseEntity<?> register(User user) {
         if (userRepository.findByEmail(user.getEmail()).isPresent()) {
@@ -31,7 +32,6 @@ public class AuthService {
         }
 
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-
         userRepository.save(user);
 
         String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());

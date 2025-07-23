@@ -11,15 +11,20 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/notify")
-public class EmailController
-{
+public class EmailController {
 
+    private final EmailService emailService;
+
+    // ✅ Constructor injection (recommended)
     @Autowired
-    private EmailService emailService;
+    public EmailController(EmailService emailService) {
+        this.emailService = emailService;
+    }
 
     @PostMapping("/send")
-    public ResponseEntity<String> send(
-            @RequestBody EmailRequestDTO request) {
-        return  ResponseEntity.ok("Email sent successfully");
+    public ResponseEntity<String> send(@RequestBody EmailRequestDTO request) {
+        // ✅ Now using the request and calling email service
+        emailService.sendEmail(request);
+        return ResponseEntity.ok("Email sent successfully");
     }
 }
