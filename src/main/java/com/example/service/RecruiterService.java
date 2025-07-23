@@ -9,10 +9,15 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 @Service
-public class RecruiterService
-{
+public class RecruiterService {
+
+    private final RecruiterRepository recruiterRepository;
+
+    // ✅ Constructor-based injection (best practice)
     @Autowired
-    private RecruiterRepository recruiterRepository;
+    public RecruiterService(RecruiterRepository recruiterRepository) {
+        this.recruiterRepository = recruiterRepository;
+    }
 
     public RecruiterDTO createRecruiter(RecruiterDTO dto) {
         Recruiter recruiter = new Recruiter(
@@ -24,14 +29,19 @@ public class RecruiterService
                 dto.companyDescription,
                 dto.companyWebsite
         );
-        recruiter = recruiterRepository.save(recruiter);
-//        dto.setId(recruiter.getId());
+
+        Recruiter savedRecruiter = recruiterRepository.save(recruiter);
+
+        // ✅ Optionally update DTO with ID from DB if needed
+        dto.id = savedRecruiter.getId();
+
         return dto;
     }
 
     public RecruiterDTO getRecruiterByEmail(String email) {
         Recruiter recruiter = recruiterRepository.findByEmail(email);
-        if(recruiter == null) return null;
+        if (recruiter == null) return null;
+
         return new RecruiterDTO(
                 recruiter.getId(),
                 recruiter.getName(),
@@ -39,14 +49,15 @@ public class RecruiterService
                 recruiter.getPhone(),
                 recruiter.getCompanyName(),
                 recruiter.getCompanyDescription(),
-                recruiter.getCompanyWebsite());
+                recruiter.getCompanyWebsite()
+        );
     }
 
     public RecruiterDTO getRecruiterById(Long id) {
         Optional<Recruiter> optionalRecruiter = recruiterRepository.findById(id);
-        if(optionalRecruiter.isEmpty()) return  null;
-        Recruiter recruiter = optionalRecruiter.get();
+        if (optionalRecruiter.isEmpty()) return null;
 
+        Recruiter recruiter = optionalRecruiter.get();
         return new RecruiterDTO(
                 recruiter.getId(),
                 recruiter.getName(),
@@ -54,6 +65,7 @@ public class RecruiterService
                 recruiter.getPhone(),
                 recruiter.getCompanyName(),
                 recruiter.getCompanyDescription(),
-                recruiter.getCompanyWebsite());
+                recruiter.getCompanyWebsite()
+        );
     }
 }

@@ -4,12 +4,18 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
+/**
+ * Configuration class for defining the RestTemplate bean.
+ */
+@SuppressWarnings("unused") // Suppress warning if not used yet
 @Configuration
 public class RestTemplateConfig {
 
+    /**
+     * Defines a RestTemplate bean for making HTTP requests.
+     */
     @Bean
     public RestTemplate restTemplate() {
         return new RestTemplate();
     }
 }
-

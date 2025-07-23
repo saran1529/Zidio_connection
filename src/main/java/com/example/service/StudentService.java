@@ -3,27 +3,31 @@ package com.example.service;
 import com.example.DTO.StudentDTO;
 import com.example.entity.Student;
 import com.example.repository.StudentRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
-public class StudentService
-{
-    @Autowired
-    private StudentRepository studentRepository;
+public class StudentService {
+
+    private final StudentRepository studentRepository;
+
+    // ✅ Constructor Injection (removes warning and follows Spring best practice)
+    public StudentService(StudentRepository studentRepository) {
+        this.studentRepository = studentRepository;
+    }
 
     public StudentDTO getStudentByEmail(String email) {
         Student student = studentRepository.findByEmail(email);
-        if(student == null) return null;
-        return mapToDTO(student);
+        return (student == null) ? null : mapToDTO(student);
     }
 
-    public  StudentDTO getStudentById(Long id) {
-        Optional<Student> studentOptional = studentRepository.findById(id);
-        if (studentOptional.isEmpty()) return null;
-        return  mapToDTO(studentOptional.get());}
+    public StudentDTO getStudentById(Long id) {
+        // ✅ Replaced with functional style using map()
+        return studentRepository.findById(id)
+                .map(this::mapToDTO)
+                .orElse(null);
+    }
 
     public StudentDTO createStudent(StudentDTO dto) {
         Student student = new Student(
@@ -32,26 +36,26 @@ public class StudentService
                 dto.getEmail(),
                 dto.getPhone(),
                 dto.getQualification(),
-                dto.getResumeURL());
+                dto.getResumeURL()
+        );
         Student saved = studentRepository.save(student);
-        return mapToDTO(saved);}
-
-    public  StudentDTO updateStudent(StudentDTO dto) {
-        Optional<Student> studentOptional = studentRepository.findById(dto.getId());
-        if (studentOptional.isEmpty()) return  null;
-
-        Student student = studentOptional.get();
-        student.setName(dto.getName());
-        student.setEmail(dto.getEmail());
-        student.setPhone(dto.getPhone());
-        student.setQualification(dto.getQualification());
-        student.setResumeURL(dto.getResumeURL());
-
-        Student updated = studentRepository.save(student);
-        return mapToDTO(updated);
+        return mapToDTO(saved);
     }
 
-    public  boolean deleteStudent(Long id) {
+    public StudentDTO updateStudent(StudentDTO dto) {
+        return studentRepository.findById(dto.getId())
+                .map(student -> {
+                    student.setName(dto.getName());
+                    student.setEmail(dto.getEmail());
+                    student.setPhone(dto.getPhone());
+                    student.setQualification(dto.getQualification());
+                    student.setResumeURL(dto.getResumeURL());
+                    return mapToDTO(studentRepository.save(student));
+                })
+                .orElse(null);
+    }
+
+    public boolean deleteStudent(Long id) {
         if (!studentRepository.existsById(id)) {
             return false;
         }

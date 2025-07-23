@@ -1,7 +1,10 @@
 package com.example.enums;
 
+@SuppressWarnings("unused")
 public enum PaymentType
 {
-    CREDIRCARD, DEBITCARD, UPI, NET_BANKING
-
+    CREDITCARD,
+    DEBITCARD,
+    UPI,
+    NET_BANKING
 }

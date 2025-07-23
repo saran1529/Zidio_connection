@@ -1,16 +1,17 @@
 package com.example.service;
 
 import com.example.DTO.AnalyticalResponseDTO;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 @Service
-public class AnalyticService
-{
+public class AnalyticService {
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final RestTemplate restTemplate;
+
+    public AnalyticService(RestTemplate restTemplate) {
+        this.restTemplate = restTemplate;
+    }
 
     public AnalyticalResponseDTO collectData() {
         Long students = restTemplate.getForObject(
@@ -29,14 +30,16 @@ public class AnalyticService
                 "http://fileUpload-service/internal/count", String.class);
         String email = restTemplate.getForObject(
                 "http://email-service/internal/count", String.class);
-                return new AnalyticalResponseDTO(
-                        students,
-                        recruiters,
-                        jobPosts,
-                        auth,
-                        applications,
-                        admins,
-                        fileUpload,
-                        email);
+
+        return new AnalyticalResponseDTO(
+                students,
+                recruiters,
+                jobPosts,
+                auth,
+                applications,
+                admins,
+                fileUpload,
+                email
+        );
     }
 }

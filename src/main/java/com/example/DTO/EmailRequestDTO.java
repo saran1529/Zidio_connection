@@ -1,44 +1,16 @@
 package com.example.DTO;
 
-public class EmailRequestDTO
-{
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-    public String to;
-    public String subject;
-    public String body;
-
-    public EmailRequestDTO() {}
-
-    public EmailRequestDTO(
-            String to,
-            String subject,
-            String body) {
-                        this.to = to;
-                        this.subject = subject;
-                        this.body = body;
-    }
-
-    public String getTo() {
-        return to;
-    }
-
-    public void setTo(String to) {
-        this.to = to;
-    }
-
-    public String getSubject() {
-        return subject;
-    }
-
-    public void setSubject(String subject) {
-        this.subject = subject;
-    }
-
-    public String getBody() {
-        return body;
-    }
-
-    public void setBody(String body) {
-        this.body = body;
-    }
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class EmailRequestDTO {
+    private String to;
+    private String subject;
+    private String body;
 }

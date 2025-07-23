@@ -9,22 +9,28 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Optional;
 
 @RestController
-@RequestMapping("api/user_subscription_status")
-public class UserPaymentStatusController
-{
+@RequestMapping("/api/user_subscription_status")
+public class UserPaymentStatusController {
+
+    private final UserPaymentStatusService userPaymentStatusService;
+
+    // ✅ Constructor-based dependency injection (recommended)
     @Autowired
-    private UserPaymentStatusService userPaymentStatusService;
+    public UserPaymentStatusController(UserPaymentStatusService userPaymentStatusService) {
+        this.userPaymentStatusService = userPaymentStatusService;
+    }
 
-
+    // ✅ Assign subscription plan to user
     @PostMapping
-    public ResponseEntity<PaymentDTO>assign(@RequestBody PaymentDTO dto ){
-        return ResponseEntity.ok(userPaymentStatusService.assignSubscriptionPlan(dto));
+    public ResponseEntity<PaymentDTO> assign(@RequestBody PaymentDTO dto) {
+        PaymentDTO result = userPaymentStatusService.assignSubscriptionPlan(dto);
+        return ResponseEntity.ok(result);
     }
 
-    @GetMapping("{userId}")
-    public ResponseEntity<Optional<PaymentDTO>> getStatus(@PathVariable Long userId){
-        return ResponseEntity.ok(userPaymentStatusService.getStatusByUserId(userId));
+    // ✅ Get subscription status by user ID
+    @GetMapping("/{userId}")
+    public ResponseEntity<Optional<PaymentDTO>> getStatus(@PathVariable Long userId) {
+        Optional<PaymentDTO> result = userPaymentStatusService.getStatusByUserId(userId);
+        return ResponseEntity.ok(result);
     }
-
-
 }
