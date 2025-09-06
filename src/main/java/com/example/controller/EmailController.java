@@ -2,28 +2,34 @@ package com.example.controller;
 
 import com.example.DTO.EmailRequestDTO;
 import com.example.service.EmailService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+/**
+ * Controller to handle email sending requests.
+ */
 @RestController
 @RequestMapping("/api/notify")
 public class EmailController {
 
     private final EmailService emailService;
 
-    // ✅ Constructor injection (recommended)
-    @Autowired
+    /**
+     * Constructor injection of EmailService.
+     */
     public EmailController(EmailService emailService) {
         this.emailService = emailService;
     }
 
+    /**
+     * Endpoint to send an email.
+     * POST /api/notify/send
+     *
+     * @param request contains email details (to, subject, body)
+     * @return HTTP 200 OK with success message
+     */
     @PostMapping("/send")
-    public ResponseEntity<String> send(@RequestBody EmailRequestDTO request) {
-        // ✅ Now using the request and calling email service
+    public ResponseEntity<String> sendEmail(@RequestBody EmailRequestDTO request) {
         emailService.sendEmail(request);
         return ResponseEntity.ok("Email sent successfully");
     }

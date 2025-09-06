@@ -1,10 +1,9 @@
 package com.example.enums;
 
-@SuppressWarnings("unused")
-public enum PaymentType
-{
-    CREDITCARD,
-    DEBITCARD,
+public enum PaymentType {
+    RAZORPAY,
+    CREDIT_CARD,
+    DEBIT_CARD,
     UPI,
-    NET_BANKING
+    NETBANKING
 }

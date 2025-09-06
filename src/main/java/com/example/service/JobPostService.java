@@ -1,12 +1,11 @@
 package com.example.service;
 
 import com.example.DTO.JobPostDTO;
-import com.example.enums.JobType;
 import com.example.entity.JobPost;
+import com.example.enums.JobType;
 import com.example.repository.JobPostRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -15,85 +14,65 @@ public class JobPostService {
 
     private final JobPostRepository jobPostRepository;
 
-    // ✅ Constructor Injection (Recommended)
     public JobPostService(JobPostRepository jobPostRepository) {
         this.jobPostRepository = jobPostRepository;
     }
 
+    /** 🔹 Create / Post a job */
     public JobPostDTO postJob(JobPostDTO dto) {
-        JobPost jobPost = new JobPost(
-                dto.getId(),
-                dto.getJobTitle(),
-                dto.getJobType(),
-                dto.getJobLocation(),
-                dto.getJobDescription(),
-                dto.getCompanyName(),
-                dto.getPostedByEmail(),
-                dto.getPostedDate());
+        JobPost job = new JobPost();
+        job.setJobTitle(dto.getJobTitle());
+        job.setJobType(dto.getJobType());
+        job.setJobLocation(dto.getJobLocation());
+        job.setJobDescription(dto.getJobDescription());
+        job.setCompanyName(dto.getCompanyName());
+        job.setPostedByEmail(dto.getPostedByEmail());
+        job.setPostedDate(dto.getPostedDate() != null ? dto.getPostedDate() : new java.util.Date());
 
-        JobPost saved = jobPostRepository.save(jobPost);
-        return mapToDTO(saved);
+        JobPost savedJob = jobPostRepository.save(job);
+
+        return mapToDTO(savedJob);
     }
 
+    /** 🔹 Get jobs by recruiter email */
     public List<JobPostDTO> getByPostedByEmail(String email) {
         return jobPostRepository.findByPostedByEmail(email)
-                .stream()
-                .map(this::mapToDTO)
+                .stream().map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
+    /** 🔹 Get jobs by job title */
     public List<JobPostDTO> getByJobTitle(String jobTitle) {
-        return jobPostRepository.findByJobTitle(jobTitle)
-                .stream()
-                .map(this::mapToDTO)
+        return jobPostRepository.findByJobTitleContainingIgnoreCase(jobTitle)
+                .stream().map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
+    /** 🔹 Get jobs by job type */
     public List<JobPostDTO> getByJobType(JobType jobType) {
         return jobPostRepository.findByJobType(jobType)
-                .stream()
-                .map(this::mapToDTO)
+                .stream().map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
+    /** 🔹 Get jobs by company name */
     public List<JobPostDTO> getByCompanyName(String companyName) {
-        return jobPostRepository.findByCompanyName(companyName)
-                .stream()
-                .map(this::mapToDTO)
+        return jobPostRepository.findByCompanyNameContainingIgnoreCase(companyName)
+                .stream().map(this::mapToDTO)
                 .collect(Collectors.toList());
     }
 
-    // 🟡 The following methods are unused — keep only if you need them in future
-    public List<JobPostDTO> getByJobDescription(String jobDescription) {
-        return jobPostRepository.findByJobDescription(jobDescription)
-                .stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<JobPostDTO> getByJobLocation(String jobLocation) {
-        return jobPostRepository.findByJobLocation(jobLocation)
-                .stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
-    }
-
-    public List<JobPostDTO> getByPostedDate(Date postedDate) {
-        return jobPostRepository.findByPostedDate(postedDate)
-                .stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
-    }
-
-    private JobPostDTO mapToDTO(JobPost jobPost) {
-        return new JobPostDTO(
-                jobPost.getId(),
-                jobPost.getJobTitle(),
-                jobPost.getJobType(),
-                jobPost.getJobLocation(),
-                jobPost.getJobDescription(),
-                jobPost.getCompanyName(),
-                jobPost.getPostedByEmail(),
-                jobPost.getPostedDate());
+    /** 🔹 Map entity to DTO */
+    private JobPostDTO mapToDTO(JobPost job) {
+        JobPostDTO dto = new JobPostDTO();
+        dto.setId(job.getId());
+        dto.setJobTitle(job.getJobTitle());
+        dto.setJobType(job.getJobType());
+        dto.setJobLocation(job.getJobLocation());
+        dto.setJobDescription(job.getJobDescription());
+        dto.setCompanyName(job.getCompanyName());
+        dto.setPostedByEmail(job.getPostedByEmail());
+        dto.setPostedDate(job.getPostedDate());
+        return dto;
     }
 }

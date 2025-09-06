@@ -1,10 +1,8 @@
 package com.example.enums;
 
-@SuppressWarnings("unused")
 public enum Role {
-
-    STUDENT,
-    RECRUITER,
-    ADMIN,
-    USER
+    ROLE_ADMIN,
+    ROLE_RECRUITER,
+    ROLE_STUDENT,
+    ROLE_USER
 }

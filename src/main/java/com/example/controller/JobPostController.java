@@ -16,7 +16,6 @@ public class JobPostController {
     private final JobPostService jobPostService;
     private final JobPostRepository jobPostRepository;
 
-    // ✅ Constructor injection (preferred over @Autowired on fields)
     public JobPostController(JobPostService jobPostService, JobPostRepository jobPostRepository) {
         this.jobPostService = jobPostService;
         this.jobPostRepository = jobPostRepository;
@@ -47,7 +46,7 @@ public class JobPostController {
         return ResponseEntity.ok(jobPostService.getByCompanyName(companyName));
     }
 
-    @GetMapping("internal/count")
+    @GetMapping("/internal/count")
     public ResponseEntity<Long> countJobPost() {
         return ResponseEntity.ok(jobPostRepository.count());
     }

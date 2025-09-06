@@ -1,9 +1,7 @@
 package com.example.enums;
 
-@SuppressWarnings("unused")
-public enum PaidStatus
-{
+public enum PaidStatus {
+    PENDING,
     PAID,
-    UNPAID,
-    PENDING
+    FAILED
 }

@@ -1,10 +1,7 @@
 package com.example.enums;
-
-@SuppressWarnings("unused")
-public enum Status
-{
-    APPLIED,
-    SHORTLIST,
+public enum Status {
+    PENDING,
+    APPROVED,
     REJECTED,
-    SELECTED
+    CLOSED
 }
