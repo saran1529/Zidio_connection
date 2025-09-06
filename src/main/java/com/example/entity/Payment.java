@@ -1,43 +1,27 @@
 package com.example.entity;
 
-import com.example.enums.PaymentStatus;
-import com.example.enums.PaymentType;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import com.example.enums.PaidStatus;
 
 @Entity
 @Table(name = "payments")
-@Getter
-@Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class Payment {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private Long userId;
-    private Long planId;
-
-    @Column(name = "transaction_id")
-    private String transactionId;
-
-    private BigDecimal amount;
-
-    private String currency;
-
+    private Double amount;
     @Enumerated(EnumType.STRING)
-    private PaymentStatus paymentStatus;
+    private PaidStatus status = PaidStatus.PENDING;
+    private String externalPaymentId;
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    @Enumerated(EnumType.STRING)
-    private PaymentType paymentType;
-
-    private LocalDateTime paymentDate;
+    public Payment() {}
+    // getters/setters
+    public Long getId() { return id; } public void setId(Long id) { this.id = id; }
+    public Long getUserId() { return userId; } public void setUserId(Long userId) { this.userId = userId; }
+    public Double getAmount() { return amount; } public void setAmount(Double amount) { this.amount = amount; }
+    public PaidStatus getStatus() { return status; } public void setStatus(PaidStatus status) { this.status = status; }
+    public String getExternalPaymentId() { return externalPaymentId; } public void setExternalPaymentId(String externalPaymentId) { this.externalPaymentId = externalPaymentId; }
+    public LocalDateTime getCreatedAt() { return createdAt; } public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
 }

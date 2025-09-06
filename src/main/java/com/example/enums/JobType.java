@@ -1,8 +1,8 @@
 package com.example.enums;
 
-@SuppressWarnings("unused")
-public enum JobType
-{
-    EXPERIENCED,
-    INTERNSHIP
+public enum JobType {
+    FULL_TIME,
+    PART_TIME,
+    INTERNSHIP,
+    CONTRACT
 }

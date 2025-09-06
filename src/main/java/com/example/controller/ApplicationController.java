@@ -1,8 +1,6 @@
 package com.example.controller;
 
-import com.example.DTO.ApplicationDTO;
-import com.example.enums.Status;
-import com.example.repository.ApplicationRepository;
+import com.example.entity.Application;
 import com.example.service.ApplicationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,36 +12,40 @@ import java.util.List;
 public class ApplicationController {
 
     private final ApplicationService applicationService;
-    private final ApplicationRepository applicationRepository;
 
-    // ✅ Constructor injection (recommended)
-    public ApplicationController(ApplicationService applicationService, ApplicationRepository applicationRepository) {
+    public ApplicationController(ApplicationService applicationService) {
         this.applicationService = applicationService;
-        this.applicationRepository = applicationRepository;
     }
 
+    // Apply to a job
     @PostMapping("/apply")
-    public ResponseEntity<ApplicationDTO> apply(@RequestBody ApplicationDTO dto) {
-        return ResponseEntity.ok(applicationService.apply(dto));
+    public ResponseEntity<Application> applyToJob(@RequestParam Long studentId,
+                                                  @RequestParam Long jobPostId) {
+        return ResponseEntity.ok(applicationService.applyToJob(studentId, jobPostId));
     }
 
+    // Get all applications
+    @GetMapping
+    public ResponseEntity<List<Application>> getAllApplications() {
+        return ResponseEntity.ok(applicationService.getAllApplications());
+    }
+
+    // Get applications by student
     @GetMapping("/student/{studentId}")
-    public ResponseEntity<List<ApplicationDTO>> getApplicationByStudentId(@PathVariable Long studentId) {
-        return ResponseEntity.ok(applicationService.getApplicationByStudentId(studentId));
+    public ResponseEntity<List<Application>> getApplicationsByStudent(@PathVariable Long studentId) {
+        return ResponseEntity.ok(applicationService.getApplicationsByStudent(studentId));
     }
 
-    @GetMapping("/job/{jobId}")
-    public ResponseEntity<List<ApplicationDTO>> getApplicationByJobId(@PathVariable Long jobId) {
-        return ResponseEntity.ok(applicationService.getApplicationByJobId(jobId));
+    // Get applications by job post
+    @GetMapping("/job/{jobPostId}")
+    public ResponseEntity<List<Application>> getApplicationsByJob(@PathVariable Long jobPostId) {
+        return ResponseEntity.ok(applicationService.getApplicationsByJob(jobPostId));
     }
 
-    @PostMapping("/{id}/status")
-    public void updateStatus(@PathVariable Long id, @RequestParam Status status) {
-        applicationService.updateStatus(id, status);
-    }
-
-    @GetMapping("/internal/count")
-    public ResponseEntity<Long> countApplication() {
-        return ResponseEntity.ok(applicationRepository.count());
+    // Update application status
+    @PutMapping("/{applicationId}/status")
+    public ResponseEntity<Application> updateStatus(@PathVariable Long applicationId,
+                                                    @RequestParam String status) {
+        return ResponseEntity.ok(applicationService.updateStatus(applicationId, status));
     }
 }

@@ -1,11 +1,10 @@
 package com.example.service;
 
-import com.example.DTO.RecruiterDTO;
 import com.example.entity.Recruiter;
 import com.example.repository.RecruiterRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -13,59 +12,46 @@ public class RecruiterService {
 
     private final RecruiterRepository recruiterRepository;
 
-    // ✅ Constructor-based injection (best practice)
-    @Autowired
     public RecruiterService(RecruiterRepository recruiterRepository) {
         this.recruiterRepository = recruiterRepository;
     }
 
-    public RecruiterDTO createRecruiter(RecruiterDTO dto) {
-        Recruiter recruiter = new Recruiter(
-                dto.id,
-                dto.name,
-                dto.email,
-                dto.phone,
-                dto.companyName,
-                dto.companyDescription,
-                dto.companyWebsite
-        );
-
-        Recruiter savedRecruiter = recruiterRepository.save(recruiter);
-
-        // ✅ Optionally update DTO with ID from DB if needed
-        dto.id = savedRecruiter.getId();
-
-        return dto;
+    // ✅ Create a new recruiter
+    public Recruiter createRecruiter(Recruiter recruiter) {
+        return recruiterRepository.save(recruiter);
     }
 
-    public RecruiterDTO getRecruiterByEmail(String email) {
-        Recruiter recruiter = recruiterRepository.findByEmail(email);
-        if (recruiter == null) return null;
-
-        return new RecruiterDTO(
-                recruiter.getId(),
-                recruiter.getName(),
-                recruiter.getEmail(),
-                recruiter.getPhone(),
-                recruiter.getCompanyName(),
-                recruiter.getCompanyDescription(),
-                recruiter.getCompanyWebsite()
-        );
+    // ✅ Get recruiter by ID
+    public Optional<Recruiter> getRecruiterById(Long id) {
+        return recruiterRepository.findById(id);
     }
 
-    public RecruiterDTO getRecruiterById(Long id) {
-        Optional<Recruiter> optionalRecruiter = recruiterRepository.findById(id);
-        if (optionalRecruiter.isEmpty()) return null;
+    // ✅ Get recruiter by email (useful for login/search)
+    public Optional<Recruiter> getRecruiterByEmail(String email) {
+        return recruiterRepository.findByContactEmail(email);
+    }
 
-        Recruiter recruiter = optionalRecruiter.get();
-        return new RecruiterDTO(
-                recruiter.getId(),
-                recruiter.getName(),
-                recruiter.getEmail(),
-                recruiter.getPhone(),
-                recruiter.getCompanyName(),
-                recruiter.getCompanyDescription(),
-                recruiter.getCompanyWebsite()
-        );
+    // ✅ Get all recruiters
+    public List<Recruiter> getAllRecruiters() {
+        return recruiterRepository.findAll();
+    }
+
+    // ✅ Update recruiter
+    public Recruiter updateRecruiter(Long id, Recruiter updatedRecruiter) {
+        return recruiterRepository.findById(id)
+                .map(existing -> {
+                    existing.setCompanyName(updatedRecruiter.getCompanyName());
+                    existing.setContactEmail(updatedRecruiter.getContactEmail());
+                    existing.setRecruiterName(updatedRecruiter.getRecruiterName());
+                    existing.setPhone(updatedRecruiter.getPhone());
+                    existing.setAddress(updatedRecruiter.getAddress());
+                    return recruiterRepository.save(existing);
+                })
+                .orElseThrow(() -> new RuntimeException("Recruiter not found with id " + id));
+    }
+
+    // ✅ Delete recruiter
+    public void deleteRecruiter(Long id) {
+        recruiterRepository.deleteById(id);
     }
 }

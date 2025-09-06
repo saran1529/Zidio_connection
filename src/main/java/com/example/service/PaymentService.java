@@ -1,28 +1,14 @@
 package com.example.service;
-
-import com.example.DTO.PaymentDTO;
-import com.example.enums.PaidStatus;
+import com.example.entity.Payment;
+import com.example.repository.PaymentRepository;
 import org.springframework.stereotype.Service;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class PaymentService {
-
-    private final List<PaymentDTO> payments = new ArrayList<>();
-
-    public PaymentDTO makePayment(PaymentDTO dto) {
-        dto.id = (long) (payments.size() + 1);
-        dto.subscriptionStart = LocalDate.now();
-        dto.subscriptionEnd = dto.subscriptionStart.plusDays(30);
-        dto.status = PaidStatus.PAID;
-        payments.add(dto);
-        return dto;
-    }
-
-    public List<PaymentDTO> getAllPayments() {
-        return payments;
-    }
+    private final PaymentRepository repo;
+    public PaymentService(PaymentRepository repo) { this.repo = repo; }
+    public Payment create(Payment p) { return repo.save(p); }
+    public List<Payment> list() { return repo.findAll(); }
+    public Payment get(Long id) { return repo.findById(id).orElseThrow(() -> new RuntimeException("Not found")); }
 }

@@ -1,70 +1,65 @@
 package com.example.service;
 
-import com.example.DTO.ApplicationDTO;
-import com.example.enums.Status;
 import com.example.entity.Application;
+import com.example.entity.Student;
+import com.example.entity.JobPost;
 import com.example.repository.ApplicationRepository;
+import com.example.repository.StudentRepository;
+import com.example.repository.JobPostRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;
+    private final StudentRepository studentRepository;
+    private final JobPostRepository jobPostRepository;
 
-    // ✅ Constructor injection (removes warning and is preferred)
-    public ApplicationService(ApplicationRepository applicationRepository) {
+    public ApplicationService(ApplicationRepository applicationRepository,
+                              StudentRepository studentRepository,
+                              JobPostRepository jobPostRepository) {
         this.applicationRepository = applicationRepository;
+        this.studentRepository = studentRepository;
+        this.jobPostRepository = jobPostRepository;
     }
 
-    public ApplicationDTO apply(ApplicationDTO dto) {
-        Application app = mapToEntity(dto);
-        Application saved = applicationRepository.save(app);
-        return mapToDTO(saved);
+    // Apply to a job
+    public Application applyToJob(Long studentId, Long jobPostId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+        JobPost jobPost = jobPostRepository.findById(jobPostId)
+                .orElseThrow(() -> new RuntimeException("Job post not found"));
+
+        Application application = new Application(student, jobPost, "PENDING");
+        return applicationRepository.save(application);
     }
 
-    public List<ApplicationDTO> getApplicationByStudentId(Long studentId) {
-        return applicationRepository.findByStudentId(studentId)
-                .stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+    // Get all applications
+    public List<Application> getAllApplications() {
+        return applicationRepository.findAll();
     }
 
-    public List<ApplicationDTO> getApplicationByJobId(Long jobId) {
-        return applicationRepository.findByJobId(jobId)
-                .stream()
-                .map(this::mapToDTO)
-                .collect(Collectors.toList());
+    // Get applications by student
+    public List<Application> getApplicationsByStudent(Long studentId) {
+        Student student = studentRepository.findById(studentId)
+                .orElseThrow(() -> new RuntimeException("Student not found"));
+        return applicationRepository.findByStudent(student);
     }
 
-    public void updateStatus(Long id, Status status) {
-        Application app = applicationRepository.findById(id)
+    // Get applications by job post
+    public List<Application> getApplicationsByJob(Long jobPostId) {
+        JobPost jobPost = jobPostRepository.findById(jobPostId)
+                .orElseThrow(() -> new RuntimeException("Job post not found"));
+        return applicationRepository.findByJobPost(jobPost);
+    }
+
+    // Update application status
+    public Application updateStatus(Long applicationId, String status) {
+        Application application = applicationRepository.findById(applicationId)
                 .orElseThrow(() -> new RuntimeException("Application not found"));
-        app.setStatus(status);
-        applicationRepository.save(app);
-    }
-
-    private ApplicationDTO mapToDTO(Application app) {
-        return new ApplicationDTO(
-                app.getId(),
-                app.getStudentId(),
-                app.getJobId(),
-                app.getResumeURL(),
-                app.getStatus(),
-                app.getAppliedDate()
-        );
-    }
-
-    private Application mapToEntity(ApplicationDTO dto) {
-        return new Application(
-                dto.getId(),
-                dto.getStudentId(),
-                dto.getJobId(),
-                dto.getResumeURL(),
-                dto.getStatus(),
-                dto.getAppliedDate()
-        );
+        application.setStatus(status);
+        return applicationRepository.save(application);
     }
 }

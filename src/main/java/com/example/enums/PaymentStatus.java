@@ -1,10 +1,7 @@
 package com.example.enums;
-
-@SuppressWarnings("unused")
-public enum PaymentStatus
-{
+public enum PaymentStatus {
+    SUCCESS,
+    FAILED,
     PENDING,
-    COMPLETED,
-    FAILED
-
+    REFUNDED
 }

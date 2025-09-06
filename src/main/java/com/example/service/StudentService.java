@@ -12,49 +12,55 @@ public class StudentService {
 
     private final StudentRepository studentRepository;
 
-    // ✅ Constructor Injection (removes warning and follows Spring best practice)
     public StudentService(StudentRepository studentRepository) {
         this.studentRepository = studentRepository;
     }
 
-    public StudentDTO getStudentByEmail(String email) {
-        Student student = studentRepository.findByEmail(email);
-        return (student == null) ? null : mapToDTO(student);
-    }
-
+    /** ✅ Get student by ID */
     public StudentDTO getStudentById(Long id) {
-        // ✅ Replaced with functional style using map()
-        return studentRepository.findById(id)
-                .map(this::mapToDTO)
-                .orElse(null);
+        Optional<Student> optional = studentRepository.findById(id);
+        if (optional.isEmpty()) {
+            return null;
+        }
+        Student student = optional.get();
+        return mapToDTO(student);
     }
 
+    /** ✅ Get student by email */
+    public StudentDTO getStudentByEmail(String email) {
+        Optional<Student> optional = studentRepository.findByEmail(email);
+        if (optional.isEmpty()) {
+            return null;
+        }
+        Student student = optional.get();
+        return mapToDTO(student);
+    }
+
+    /** ✅ Create a new student */
     public StudentDTO createStudent(StudentDTO dto) {
-        Student student = new Student(
-                null,
-                dto.getName(),
-                dto.getEmail(),
-                dto.getPhone(),
-                dto.getQualification(),
-                dto.getResumeURL()
-        );
-        Student saved = studentRepository.save(student);
-        return mapToDTO(saved);
+        Student student = new Student();
+        student.setName(dto.getName());
+        student.setEmail(dto.getEmail());
+        student.setPhone(dto.getPhone());
+        student = studentRepository.save(student);
+        return mapToDTO(student);
     }
 
+    /** ✅ Update an existing student */
     public StudentDTO updateStudent(StudentDTO dto) {
-        return studentRepository.findById(dto.getId())
-                .map(student -> {
-                    student.setName(dto.getName());
-                    student.setEmail(dto.getEmail());
-                    student.setPhone(dto.getPhone());
-                    student.setQualification(dto.getQualification());
-                    student.setResumeURL(dto.getResumeURL());
-                    return mapToDTO(studentRepository.save(student));
-                })
-                .orElse(null);
+        Optional<Student> optional = studentRepository.findById(dto.getId());
+        if (optional.isEmpty()) {
+            return null;
+        }
+        Student student = optional.get();
+        student.setName(dto.getName());
+        student.setEmail(dto.getEmail());
+        student.setPhone(dto.getPhone());
+        student = studentRepository.save(student);
+        return mapToDTO(student);
     }
 
+    /** ✅ Delete a student by ID */
     public boolean deleteStudent(Long id) {
         if (!studentRepository.existsById(id)) {
             return false;
@@ -63,14 +69,13 @@ public class StudentService {
         return true;
     }
 
+    /** ✅ Helper method to convert Student to StudentDTO */
     private StudentDTO mapToDTO(Student student) {
-        return new StudentDTO(
-                student.getId(),
-                student.getName(),
-                student.getEmail(),
-                student.getPhone(),
-                student.getQualification(),
-                student.getResumeURL()
-        );
+        StudentDTO dto = new StudentDTO();
+        dto.setId(student.getId());
+        dto.setName(student.getName());
+        dto.setEmail(student.getEmail());
+        dto.setPhone(student.getPhone());
+        return dto;
     }
 }

@@ -1,63 +1,46 @@
 package com.example.service;
 
-import com.example.entity.User;
-import com.example.repository.UserRepository;
-import com.example.security.JWTUtil;
-import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import com.example.DTO.RegisterRequest;
+import com.example.DTO.LoginRequest;
+import com.example.entity.AdminUser;
+import com.example.repository.AdminUserRepository;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
 import java.util.Optional;
 
 @Service
 public class AuthService {
 
-    private final UserRepository userRepository;
-    private final JWTUtil jwtUtil;
-    private final PasswordEncoder passwordEncoder;
+    private final AdminUserRepository repo;
+    private final BCryptPasswordEncoder passwordEncoder;
 
-    // ✅ Constructor Injection (removes all field assignment warnings)
-    public AuthService(UserRepository userRepository, JWTUtil jwtUtil, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.jwtUtil = jwtUtil;
+    public AuthService(AdminUserRepository repo, BCryptPasswordEncoder passwordEncoder) {
+        this.repo = repo;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public ResponseEntity<?> register(User user) {
-        if (userRepository.findByEmail(user.getEmail()).isPresent()) {
-            return ResponseEntity.badRequest().body(new HashMap<>() {{
-                put("message", "Email already registered");
-            }});
-        }
+    // Register new user
+    public AdminUser register(RegisterRequest request) {
+        AdminUser user = new AdminUser();
+        user.setName(request.getName());
+        user.setUsername(request.getEmail()); // using email field as username
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setUserRole(request.getRole()); // role -> userRole
 
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepository.save(user);
-
-        String token = jwtUtil.generateToken(user.getEmail(), user.getRole().name());
-
-        return ResponseEntity.ok(new HashMap<>() {{
-            put("token", token);
-            put("message", "User Registered Successful");
-        }});
+        return repo.save(user);
     }
 
-    public ResponseEntity<?> login(User user) {
-        Optional<User> existingUser = userRepository.findByEmail(user.getEmail());
-
-        if (existingUser.isEmpty() || !passwordEncoder.matches(user.getPassword(), existingUser.get().getPassword())) {
-            return ResponseEntity.badRequest().body(new HashMap<>() {{
-                put("message", "Invalid email or password");
-            }});
+    // Login
+    public AdminUser login(LoginRequest request) {
+        Optional<AdminUser> userOpt = repo.findByUsername(request.getEmail());
+        // again using email field as username
+        if (userOpt.isPresent()) {
+            AdminUser user = userOpt.get();
+            if (passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+                return user; // valid login
+            }
         }
-
-        String token = jwtUtil.generateToken(
-                existingUser.get().getEmail(),
-                existingUser.get().getRole().name());
-
-        return ResponseEntity.ok(new HashMap<>() {{
-            put("token", token);
-            put("message", "Login successful");
-        }});
+        throw new RuntimeException("Invalid username/email or password");
     }
 }

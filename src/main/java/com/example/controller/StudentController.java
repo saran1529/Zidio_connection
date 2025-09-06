@@ -17,6 +17,7 @@ public class StudentController {
     private final StudentService studentService;
     private final StudentRepository studentRepository;
 
+    // ✅ Constructor injection (best practice)
     @Autowired
     public StudentController(StudentService studentService, StudentRepository studentRepository) {
         this.studentService = studentService;
@@ -24,7 +25,7 @@ public class StudentController {
     }
 
     /**
-     * Get student by email.
+     * ✅ Get student by email
      */
     @GetMapping("/email/{email}")
     public ResponseEntity<StudentDTO> getStudentByEmail(@PathVariable String email) {
@@ -33,7 +34,7 @@ public class StudentController {
     }
 
     /**
-     * Get student by ID.
+     * ✅ Get student by ID
      */
     @GetMapping("/{id}")
     public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long id) {
@@ -42,7 +43,7 @@ public class StudentController {
     }
 
     /**
-     * Create a new student.
+     * ✅ Create a new student
      */
     @PostMapping
     public ResponseEntity<StudentDTO> createStudent(@RequestBody StudentDTO dto) {
@@ -51,15 +52,7 @@ public class StudentController {
     }
 
     /**
-     * Count total number of students.
-     */
-    @GetMapping("/internal/count")
-    public ResponseEntity<Long> countStudents() {
-        return ResponseEntity.ok(studentRepository.count());
-    }
-
-    /**
-     * Update an existing student.
+     * ✅ Update an existing student
      */
     @PutMapping
     public ResponseEntity<StudentDTO> updateStudent(@RequestBody StudentDTO dto) {
@@ -68,11 +61,20 @@ public class StudentController {
     }
 
     /**
-     * Delete a student by ID.
+     * ✅ Delete a student by ID
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         boolean deleted = studentService.deleteStudent(id);
         return !deleted ? ResponseEntity.notFound().build() : ResponseEntity.ok().build();
+    }
+
+    /**
+     * ✅ Count total number of students (used internally)
+     */
+    @GetMapping("/internal/count")
+    public ResponseEntity<Long> countStudents() {
+        long count = studentRepository.count();
+        return ResponseEntity.ok(count);
     }
 }

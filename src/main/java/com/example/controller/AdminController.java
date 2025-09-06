@@ -1,57 +1,63 @@
 package com.example.controller;
 
-import com.example.DTO.AdminUserDTO;
-import com.example.enums.Role;
+import com.example.entity.AdminUser;
+import com.example.entity.AppUser;
 import com.example.service.AdminService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+/**
+ * Controller for Admin-specific operations.
+ * Base path: /api/admin
+ */
 @RestController
-@RequestMapping("/api/admins")
+@RequestMapping("/api/admin")
 public class AdminController {
 
     private final AdminService adminService;
 
-    // ✅ Constructor-based dependency injection (best practice)
-    @Autowired
     public AdminController(AdminService adminService) {
         this.adminService = adminService;
     }
 
-    // ✅ Get all users
+    /** ✅ Get all users (students, recruiters, admins) */
     @GetMapping("/users")
-    public ResponseEntity<List<AdminUserDTO>> getAllUsers() {
+    public ResponseEntity<List<AppUser>> getAllUsers() {
         return ResponseEntity.ok(adminService.getAllUsers());
     }
 
-    // ✅ Get users by role
-    @GetMapping("/users/{role}")
-    public ResponseEntity<List<AdminUserDTO>> getByRole(@PathVariable Role role) {
-        return ResponseEntity.ok(adminService.findByRole(role));
+    /** ✅ Get user by ID */
+    @GetMapping("/users/{id}")
+    public ResponseEntity<AppUser> getUserById(@PathVariable Long id) {
+        return adminService.getUserById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ Update user status by email
-    @PutMapping("/status/{email}")
-    public ResponseEntity<AdminUserDTO> updateUserStatus(
-            @PathVariable String email,
-            @RequestParam boolean isActive) {
-        return ResponseEntity.ok(adminService.updateStatus(email, isActive));
+    /** ✅ Delete a user */
+    @DeleteMapping("/users/{id}")
+    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+        boolean deleted = adminService.deleteUser(id);
+        if (deleted) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.notFound().build();
     }
 
-    // ✅ Block user by ID
-    @PostMapping("/users/block")
-    public ResponseEntity<String> blockUser(@RequestParam Long id) {
-        adminService.blockUser(id);
-        return ResponseEntity.ok("User blocked successfully.");
+    /** ✅ Update admin profile */
+    @PutMapping("/profile")
+    public ResponseEntity<AdminUser> updateAdminProfile(@RequestBody AdminUser admin) {
+        AdminUser updated = adminService.updateAdminProfile(admin);
+        return ResponseEntity.ok(updated);
     }
 
-    // ✅ Unblock user by ID
-    @PostMapping("/users/unblock")
-    public ResponseEntity<String> unblockUser(@RequestParam Long id) {
-        adminService.unBlockUser(id);
-        return ResponseEntity.ok("User unblocked successfully.");
+    /** ✅ Get admin profile by email */
+    @GetMapping("/profile/{email}")
+    public ResponseEntity<AdminUser> getAdminProfile(@PathVariable String email) {
+        return adminService.getAdminByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
     }
 }

@@ -1,30 +1,54 @@
 package com.example.entity;
 
-import com.example.enums.Status;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
-
-import java.util.Date;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "applications")
-@Data
-@NoArgsConstructor
-@AllArgsConstructor
 public class Application {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long studentId;
-    private Long jobId;
-    private String resumeURL;
+    // Many applications can belong to one student
+    @ManyToOne
+    @JoinColumn(name = "student_id", nullable = false)
+    private Student student;
 
-    @Enumerated(EnumType.STRING)
-    private Status status;
+    // Many applications can belong to one job post
+    @ManyToOne
+    @JoinColumn(name = "job_post_id", nullable = false)
+    private JobPost jobPost;
 
-    private Date appliedDate;
+    @Column(nullable = false)
+    private String status; // Example: PENDING, APPROVED, REJECTED
+
+    @Column(name = "applied_date", nullable = false)
+    private LocalDateTime appliedDate = LocalDateTime.now();
+
+    public Application() {}
+
+    public Application(Student student, JobPost jobPost, String status) {
+        this.student = student;
+        this.jobPost = jobPost;
+        this.status = status;
+        this.appliedDate = LocalDateTime.now();
+    }
+
+    // Getters and Setters
+    public Long getId() { return id; }
+    public void setId(Long id) { this.id = id; }
+
+    public Student getStudent() { return student; }
+    public void setStudent(Student student) { this.student = student; }
+
+    public JobPost getJobPost() { return jobPost; }
+    public void setJobPost(JobPost jobPost) { this.jobPost = jobPost; }
+
+    public String getStatus() { return status; }
+    public void setStatus(String status) { this.status = status; }
+
+    public LocalDateTime getAppliedDate() { return appliedDate; }
+    public void setAppliedDate(LocalDateTime appliedDate) { this.appliedDate = appliedDate; }
 }

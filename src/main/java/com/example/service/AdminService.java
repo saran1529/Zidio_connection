@@ -1,70 +1,51 @@
 package com.example.service;
 
-import com.example.DTO.AdminUserDTO;
-import com.example.enums.Role;
+import com.example.entity.AppUser;
 import com.example.entity.AdminUser;
-import com.example.repository.SystemUserRepository;
+import com.example.repository.AppUserRepository;
+import com.example.repository.AdminUserRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 public class AdminService {
 
-    private final SystemUserRepository systemUserRepository;
+    private final AdminUserRepository adminRepo;
+    private final AppUserRepository appUserRepo;
 
-    // ✅ Constructor injection (recommended and warning-free)
-    public AdminService(SystemUserRepository systemUserRepository) {
-        this.systemUserRepository = systemUserRepository;
+    public AdminService(AdminUserRepository adminRepo, AppUserRepository appUserRepo) {
+        this.adminRepo = adminRepo;
+        this.appUserRepo = appUserRepo;
     }
 
-    public List<AdminUserDTO> getAllUsers() {
-        return systemUserRepository.findAll()
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
+    // Fetch all AppUsers
+    public List<AppUser> getAllUsers() {
+        return appUserRepo.findAll();
     }
 
-    public void blockUser(Long id) {
-        AdminUser user = systemUserRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("user not found"));
-        user.setIsActive(false);
-        systemUserRepository.save(user);
+    // Fetch user by ID
+    public Optional<AppUser> getUserById(Long id) {
+        return appUserRepo.findById(id);
     }
 
-    public void unBlockUser(Long id) {
-        AdminUser user = systemUserRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("user not found"));
-        user.setIsActive(true);
-        systemUserRepository.save(user);
-    }
-
-    public List<AdminUserDTO> findByRole(Role role) {
-        return systemUserRepository.findByRole(role)
-                .stream()
-                .map(this::toDTO)
-                .collect(Collectors.toList());
-    }
-
-    public AdminUserDTO updateStatus(String email, boolean isActive) {
-        AdminUser user = systemUserRepository.findByEmail(email);
-        if (user == null) {
-            throw new RuntimeException("user not found");
+    // Delete user by ID
+    public boolean deleteUser(Long id) {
+        if (appUserRepo.existsById(id)) {
+            appUserRepo.deleteById(id);
+            return true;
         }
-
-        user.setIsActive(isActive);
-        systemUserRepository.save(user);
-        return toDTO(user);
+        return false;
     }
 
-    private AdminUserDTO toDTO(AdminUser user) {
-        return new AdminUserDTO(
-                user.getId(),
-                user.getName(),
-                user.getEmail(),
-                user.getRole(),
-                user.getIsActive()
-        );
+    // Update admin profile
+    public AdminUser updateAdminProfile(AdminUser admin) {
+        return adminRepo.save(admin);
+    }
+
+    // Get admin by email/username
+    public Optional<AdminUser> getAdminByEmail(String email) {
+        return adminRepo.findByUsername(email);
     }
 }
