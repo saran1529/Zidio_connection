@@ -10,18 +10,34 @@ public class AdminUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(nullable = false)
     private String name;
+
+    @Column(nullable = false, unique = true)
     private String username;
+
+    @Column(nullable = false)
     private String password;
+
+    @Column(nullable = false)
     private String userRole;
+
+    @Column(nullable = false)
+    private Boolean isActive;
 
     public AdminUser() {}
 
     // ✅ Add this constructor
-    public AdminUser(String username, String password, String name) {
+    public AdminUser(String username,
+                     String password,
+                     String name,
+                     String userRole,
+                     Boolean isActive) {
         this.username = username;
         this.password = password;
         this.name = name;
+        this.userRole = userRole;
+        this.isActive = isActive;
     }
 
     // Getters & Setters
@@ -39,4 +55,7 @@ public class AdminUser {
 
     public String getUserRole() { return userRole; }
     public void setUserRole(String userRole) { this.userRole = userRole; }
+
+    public Boolean getIsActive() { return isActive; }
+    public void setIsActive(Boolean isActive) { this.isActive = isActive; }
 }

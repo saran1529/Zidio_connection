@@ -5,14 +5,20 @@ public class AuthResponse {
     private String username;   // instead of email
     private String role;       // from userRole in entity
     private String message;
+    private String token;
 
     public AuthResponse() {}
 
-    public AuthResponse(String name, String username, String role, String message) {
+    public AuthResponse(String name,
+                        String username,
+                        String role,
+                        String message,
+                        String token) {
         this.name = name;
         this.username = username;
         this.role = role;
         this.message = message;
+        this.token = token;
     }
 
     // Getters & Setters
@@ -27,4 +33,7 @@ public class AuthResponse {
 
     public String getMessage() { return message; }
     public void setMessage(String message) { this.message = message; }
+
+    public String getToken() { return  token; }
+    public void setToken(String token) { this.token = token; }
 }

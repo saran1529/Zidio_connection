@@ -3,12 +3,17 @@ package com.example.service;
 import com.example.DTO.StudentDTO;
 import com.example.entity.Student;
 import com.example.repository.StudentRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.Optional;
 
 @Service
 public class StudentService {
+
+    @Autowired
+    private BCryptPasswordEncoder passwordEncoder;
 
     private final StudentRepository studentRepository;
 
@@ -22,8 +27,7 @@ public class StudentService {
         if (optional.isEmpty()) {
             return null;
         }
-        Student student = optional.get();
-        return mapToDTO(student);
+        return mapToDTO(optional.get());
     }
 
     /** ✅ Get student by email */
@@ -32,8 +36,7 @@ public class StudentService {
         if (optional.isEmpty()) {
             return null;
         }
-        Student student = optional.get();
-        return mapToDTO(student);
+        return mapToDTO(optional.get());
     }
 
     /** ✅ Create a new student */
@@ -42,13 +45,15 @@ public class StudentService {
         student.setName(dto.getName());
         student.setEmail(dto.getEmail());
         student.setPhone(dto.getPhone());
-        student = studentRepository.save(student);
-        return mapToDTO(student);
+        student.setPassword(passwordEncoder.encode(dto.getPassword()));
+
+        Student saved = studentRepository.save(student);
+        return mapToDTO(saved);
     }
 
     /** ✅ Update an existing student */
-    public StudentDTO updateStudent(StudentDTO dto) {
-        Optional<Student> optional = studentRepository.findById(dto.getId());
+    public StudentDTO updateStudent(Long id, StudentDTO dto) {
+        Optional<Student> optional = studentRepository.findById(id);
         if (optional.isEmpty()) {
             return null;
         }
@@ -56,8 +61,11 @@ public class StudentService {
         student.setName(dto.getName());
         student.setEmail(dto.getEmail());
         student.setPhone(dto.getPhone());
-        student = studentRepository.save(student);
-        return mapToDTO(student);
+        if (dto.getPassword() != null && !dto.getPassword().isEmpty()) {
+            student.setPassword(passwordEncoder.encode(dto.getPassword()));
+        }
+        Student updated = studentRepository.save(student);
+        return mapToDTO(updated);
     }
 
     /** ✅ Delete a student by ID */
@@ -76,6 +84,7 @@ public class StudentService {
         dto.setName(student.getName());
         dto.setEmail(student.getEmail());
         dto.setPhone(student.getPhone());
+
         return dto;
     }
 }

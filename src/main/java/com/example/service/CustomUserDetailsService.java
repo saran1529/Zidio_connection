@@ -27,10 +27,18 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("User is disabled");
         }
 
+        // Make sure password is not null
+        String password = user.getPassword();
+        if (password == null || password.isEmpty()) {
+            throw new UsernameNotFoundException("User has no password set");
+        }
+
+        // Return Spring Security User
         return new org.springframework.security.core.userdetails.User(
                 user.getEmail(),
-                user.getPassword(),
-                Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+                password,
+                Collections.singletonList(new SimpleGrantedAuthority(
+                        "ROLE_" + (user.getRole() !=null ? user.getRole().name() : "USER")))
         );
     }
 }

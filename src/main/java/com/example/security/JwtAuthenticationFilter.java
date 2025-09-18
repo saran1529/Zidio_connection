@@ -15,7 +15,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
 import java.io.IOException;
-import java.util.stream.Collectors;
+import java.util.List;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
@@ -33,27 +33,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String header = request.getHeader(HttpHeaders.AUTHORIZATION);
 
-        if (StringUtils.hasText(header) && header.startsWith("Bearer ")) {
+        if (header != null && header.startsWith("Bearer ")) {
             String token = header.substring(7);
 
-            if (jwtUtil.validateToken(token)) {
-                String username = jwtUtil.getSubject(token); // username = email
+         try {
+             if (jwtUtil.validateToken(token)) {
+                 String username = jwtUtil.getSubject(token); // username = email
+                 AdminUser user = adminUserRepository.findByUsername(username).orElse(null);
 
-                AdminUser user = adminUserRepository.findByUsername(username).orElse(null);
+                 if (user != null && Boolean.TRUE.equals(user.getIsActive())) {
+                     String role = user.getUserRole();
+                 if (role != null && !role.startsWith("ROLE_")) {
+                     role = "ROLE_" + role;
+                 }
+                     // Explicitly declare type to satisfy UsernamePasswordAuthenticationToken
+                     List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority(role));
 
-                if (user != null) {
-                    // Explicitly declare type to satisfy UsernamePasswordAuthenticationToken
-                    java.util.List<SimpleGrantedAuthority> authorities = user.getUserRole() != null
-                            ? java.util.List.of(new SimpleGrantedAuthority(user.getUserRole()))
-                            : java.util.List.of();
+                     UsernamePasswordAuthenticationToken authToken =
+                             new UsernamePasswordAuthenticationToken(user, null, authorities);
+                     SecurityContextHolder.getContext().setAuthentication(authToken);
+                 }
 
-                    UsernamePasswordAuthenticationToken authToken =
-                            new UsernamePasswordAuthenticationToken(user.getUsername(), null, authorities);
-
-                    SecurityContextHolder.getContext().setAuthentication(authToken);
-                }
-
-            }
+             } else {
+                 response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "Invalid or expired JWT token");
+                 return;
+             }
+         } catch (Exception ex) {
+             response.sendError(HttpServletResponse.SC_UNAUTHORIZED, "JWT validation failed: " + ex.getMessage());
+         }
         }
 
         filterChain.doFilter(request, response);

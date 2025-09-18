@@ -17,6 +17,9 @@ public class JWTUtil {
     public JWTUtil(@Value("${jwt.secret}") String secret,
                    @Value("${jwt.expiration-ms}") long expirationMsProperty) {
         // ensure secret length large enough
+        if (secret.length() < 32) {
+            throw new IllegalArgumentException("JWT secret must be at least 32 characters long");
+        }
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
         this.expirationMs = expirationMsProperty;
     }
@@ -28,43 +31,50 @@ public class JWTUtil {
                 .setSubject(subject)
                 .setIssuedAt(now)
                 .setExpiration(expiry)
-                .signWith(key)
+                .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
     }
 
-    // ✅ Extract subject (email) from token
-    public String extractEmail(String token) {
-        return getSubject(token);
-    }
-
     public String getSubject(String token) {
-        Jws<Claims> claims = Jwts.parserBuilder()
+        return Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
-                .parseClaimsJws(token);
-        return claims.getBody().getSubject();
+                .parseClaimsJws(token)
+                .getBody()
+                .getSubject();
     }
 
+    public String extractEmail(String token) {
+        try {
+            return getSubject(token);
+        } catch (JwtException | IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    // ✅ Validate token expiry only
     public boolean validateToken(String token) {
         try {
-            Jws<Claims> claims = Jwts.parserBuilder()
+            Claims claims = Jwts.parserBuilder()
                     .setSigningKey(key)
                     .build()
-                    .parseClaimsJws(token);
-            return !isTokenExpired(claims.getBody());
+                    .parseClaimsJws(token)
+                    .getBody();
+            return !isTokenExpired(claims);
         } catch (JwtException | IllegalArgumentException ex) {
             return false;
         }
+    }
 
-        // ✅ Validate token with user details
-        boolean validateToken(String token, org.springframework.security.core.userdetails.UserDetails userDetails) {
-            String email = extractEmail(token);
-            return email.equals(userDetails.getUsername()) && validateToken(token);
-        }
+    // ✅ Validate token with user details
+    public boolean validateToken(String token,
+                                 org.springframework.security.core.userdetails.UserDetails userDetails) {
+        String email = extractEmail(token);
+        return email != null && email.equals(userDetails.getUsername()) && validateToken(token);
+    }
 
-        // --- Helper: check expiry ---
-        boolean isTokenExpired(Claims claims) {
-            return claims.getExpiration().before(new Date());
-        }
+    // --- Helper: check expiry ---
+    private boolean isTokenExpired(Claims claims) {
+        return claims.getExpiration().before(new Date());
     }
 }

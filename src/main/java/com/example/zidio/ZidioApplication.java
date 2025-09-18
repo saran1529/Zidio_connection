@@ -10,10 +10,21 @@ import org.springframework.web.client.RestTemplate;
 
 
 @EnableEurekaClient
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = {
+		"com.example.zidio",
+		"com.example.controller",
+		"com.example.DTO",
+		"com.example.entity",
+		"com.example.enums",
+		"com.example.exception",
+		"com.example.repository",
+		"com.example.security",
+		"com.example.service"
+})
 @EnableJpaRepositories(basePackages = "com.example.repository")
 @EntityScan(basePackages = "com.example.entity")
 @EnableScheduling
+
 public class ZidioApplication {
 
 	public static void main(String[] args) {

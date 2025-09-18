@@ -1,13 +1,9 @@
 package com.example.security;
 
-import com.example.repository.UserRepository;
+import com.example.repository.AdminUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.AuthenticationProvider;
-import org.springframework.security.authentication.ProviderManager;
 
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -20,11 +16,12 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 @Configuration
 public class SecurityConfig {
 
-    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final JWTUtil jwtUtil;
+    private final AdminUserRepository adminUserRepository;
 
-    @Autowired
-    public SecurityConfig(JwtAuthenticationFilter jwtAuthenticationFilter) {
-        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+    public SecurityConfig(JWTUtil jwtUtil,AdminUserRepository adminUserRepository) {
+        this.jwtUtil = jwtUtil;
+        this.adminUserRepository = adminUserRepository;
     }
 
     @Bean
@@ -33,15 +30,22 @@ public class SecurityConfig {
     }
 
     @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter(jwtUtil, adminUserRepository);
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http = http.csrf().disable()
-                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and();
+           http.csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                   .authorizeHttpRequests(auth -> auth
+                           .requestMatchers("/api/auth/**","/actuator/**").permitAll()
+                           .requestMatchers("/api/students/**").hasAuthority("ROLE_USER")
+                           .anyRequest().authenticated()
+                   );
 
-        http.authorizeHttpRequests()
-                .requestMatchers("/api/auth/**", "/actuator/**").permitAll()
-                .anyRequest().authenticated();
+        http.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
-        http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 }

@@ -5,6 +5,7 @@ import com.example.repository.StudentRepository;
 import com.example.service.StudentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 /**
@@ -27,6 +28,7 @@ public class StudentController {
     /**
      * ✅ Get student by email
      */
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/email/{email}")
     public ResponseEntity<StudentDTO> getStudentByEmail(@PathVariable String email) {
         StudentDTO dto = studentService.getStudentByEmail(email);
@@ -36,6 +38,7 @@ public class StudentController {
     /**
      * ✅ Get student by ID
      */
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/{id}")
     public ResponseEntity<StudentDTO> getStudentById(@PathVariable Long id) {
         StudentDTO dto = studentService.getStudentById(id);
@@ -45,24 +48,40 @@ public class StudentController {
     /**
      * ✅ Create a new student
      */
+    @PreAuthorize("hasRole('USER')")
     @PostMapping
-    public ResponseEntity<StudentDTO> createStudent(@RequestBody StudentDTO dto) {
-        StudentDTO created = studentService.createStudent(dto);
-        return ResponseEntity.ok(created);
+    public ResponseEntity<?> createStudent(@RequestBody StudentDTO dto) {
+
+        try {
+            if (dto.getName() == null || dto.getEmail() == null || dto.getPassword() == null) {
+                return ResponseEntity.badRequest().body(
+                        new ErrorResponse("Name, email, and password are required")
+                );
+            }
+
+            StudentDTO created = studentService.createStudent(dto);
+            return ResponseEntity.ok(created);
+        } catch (Exception ex) {
+            return ResponseEntity.status(500).body(
+                    new ErrorResponse(ex.getMessage())
+            );
+        }
     }
 
     /**
      * ✅ Update an existing student
      */
-    @PutMapping
-    public ResponseEntity<StudentDTO> updateStudent(@RequestBody StudentDTO dto) {
-        StudentDTO updated = studentService.updateStudent(dto);
+    @PreAuthorize("hasRole('USER')")
+    @PutMapping("/{id}")
+    public ResponseEntity<StudentDTO> updateStudent(@PathVariable Long id, @RequestBody StudentDTO dto) {
+        StudentDTO updated = studentService.updateStudent(id, dto);
         return updated == null ? ResponseEntity.notFound().build() : ResponseEntity.ok(updated);
     }
 
     /**
      * ✅ Delete a student by ID
      */
+    @PreAuthorize("hasRole('USER')")
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteStudent(@PathVariable Long id) {
         boolean deleted = studentService.deleteStudent(id);
@@ -72,9 +91,18 @@ public class StudentController {
     /**
      * ✅ Count total number of students (used internally)
      */
+    @PreAuthorize("hasRole('USER')")
     @GetMapping("/internal/count")
     public ResponseEntity<Long> countStudents() {
         long count = studentRepository.count();
         return ResponseEntity.ok(count);
+    }
+
+    // Inner class for consistent error responses
+    public static class ErrorResponse {
+        private String error;
+        public ErrorResponse(String error) { this.error = error; }
+        public String getError() { return error; }
+        public void setError(String error) { this.error = error; }
     }
 }
