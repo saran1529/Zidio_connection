@@ -4,8 +4,8 @@ public class VerifyPaymentRequest {
     private String razorpayOrderId;
     private String razorpayPaymentId;
     private String razorpaySignature;
-    private Long invoiceId;     // optional: to mark invoice as paid
-    private String userEmail;   // optional: validate email match
+    private Long invoiceId;
+    private String userEmail;
 
     public String getRazorpayOrderId() {
         return razorpayOrderId;

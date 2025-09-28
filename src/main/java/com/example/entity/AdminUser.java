@@ -27,7 +27,6 @@ public class AdminUser {
 
     public AdminUser() {}
 
-    // ✅ Add this constructor
     public AdminUser(String username,
                      String password,
                      String name,
@@ -40,7 +39,6 @@ public class AdminUser {
         this.isActive = isActive;
     }
 
-    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

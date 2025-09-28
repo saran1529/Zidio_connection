@@ -1,5 +1,6 @@
 package com.example.entity;
 
+import com.example.enums.Status;
 import jakarta.persistence.*;
 import java.time.LocalDateTime;
 
@@ -11,32 +12,33 @@ public class Application {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // Many applications can belong to one student
     @ManyToOne
     @JoinColumn(name = "student_id", nullable = false)
     private Student student;
 
-    // Many applications can belong to one job post
     @ManyToOne
     @JoinColumn(name = "job_post_id", nullable = false)
     private JobPost jobPost;
 
     @Column(nullable = false)
-    private String status; // Example: PENDING, APPROVED, REJECTED
+    private Status status;
+
+    @Column(name = "resume_url")
+    private String resumeURL;
 
     @Column(name = "applied_date", nullable = false)
     private LocalDateTime appliedDate = LocalDateTime.now();
 
     public Application() {}
 
-    public Application(Student student, JobPost jobPost, String status) {
+    public Application(Student student, JobPost jobPost, Status status, String resumeURL) {
         this.student = student;
         this.jobPost = jobPost;
         this.status = status;
+        this.resumeURL = resumeURL;
         this.appliedDate = LocalDateTime.now();
     }
 
-    // Getters and Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 
@@ -46,8 +48,21 @@ public class Application {
     public JobPost getJobPost() { return jobPost; }
     public void setJobPost(JobPost jobPost) { this.jobPost = jobPost; }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public Status getStatus() {
+        return status;
+    }
+
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
+    public String getResumeURL() {
+        return resumeURL;
+    }
+
+    public void setResumeURL(String resumeURL) {
+        this.resumeURL = resumeURL;
+    }
 
     public LocalDateTime getAppliedDate() { return appliedDate; }
     public void setAppliedDate(LocalDateTime appliedDate) { this.appliedDate = appliedDate; }

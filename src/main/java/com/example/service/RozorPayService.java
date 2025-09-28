@@ -21,17 +21,35 @@ public class RozorPayService {
     private final String keyId;
     private final String keySecret;
 
+    private final boolean testMode; //  moved to final field (was @Value before)
+
     public RozorPayService(
             @Value("${razorpay.key.id}") String keyId,
-            @Value("${razorpay.key.secret}") String keySecret
+            @Value("${razorpay.key.secret}") String keySecret,
+            @Value("${razorpay.test-mode:true}") boolean testMode // inject testMode here instead of @Value field
     ) throws RazorpayException {
         this.keyId = keyId;
         this.keySecret = keySecret;
-        this.client = new RazorpayClient(keyId, keySecret);
+        this.testMode = testMode; // assign injected property
+
+        // Initialize client only if not in test mode
+        if (!testMode) {
+            this.client = new RazorpayClient(keyId, keySecret);
+        } else {
+            this.client = null; // skip Razorpay
+        }
     }
 
-    /** ✅ Create order using Invoice and update it */
+    /** Create order using Invoice and update it */
     public Invoice createOrder(Invoice invoice) throws RazorpayException {
+        //  merged both duplicate methods into one
+        if (testMode || keyId.startsWith("rzp_test_")) {
+            // Mock order in test mode
+            invoice.setRazorpayOrderId("TEST_ORDER_" + invoice.getId());
+            invoice.setStatus(PaidStatus.PENDING);
+            return invoice;
+        }
+
         Map<String, String> notes = new HashMap<>();
         if (invoice.getUserEmail() != null) notes.put("userEmail", invoice.getUserEmail());
         notes.put("invoiceId", String.valueOf(invoice.getId()));
@@ -45,30 +63,28 @@ public class RozorPayService {
         Order order = client.orders.create(orderRequest);
 
         invoice.setRazorpayOrderId(order.get("id"));
+        invoice.setStatus(PaidStatus.PENDING);
         return invoice;
     }
 
-    /** ✅ Create order with manual parameters */
-    public Order createOrder(Integer amount, String receipt, Map<String, String> notes) throws RazorpayException {
-        JSONObject orderRequest = new JSONObject();
-        orderRequest.put("amount", amount * 100); // in paise
-        orderRequest.put("currency", "INR");
-        orderRequest.put("receipt", receipt);
-        orderRequest.put("notes", notes);
-
-        return client.orders.create(orderRequest);
-    }
-
-    /** ✅ Verify payment and update Invoice */
+    /** Verify payment and update Invoice */
     public Invoice verifyPayment(String orderId, String paymentId, String signature, Invoice invoice) {
         try {
+            if (testMode) {
+                // In test mode, mark as paid automatically
+                invoice.setStatus(PaidStatus.PAID);
+                invoice.setPaymentId(paymentId != null ? paymentId : "TEST_PAYMENT");
+                invoice.setPaymentType(PaymentType.RAZORPAY);
+                return invoice;
+            }
+
             String payload = orderId + "|" + paymentId;
             boolean verified = Utils.verifySignature(payload, signature, keySecret);
 
             if (verified) {
                 invoice.setStatus(PaidStatus.PAID);
                 invoice.setPaymentId(paymentId);
-                invoice.setPaymentMethod(PaymentType.RAZORPAY);
+                invoice.setPaymentType(PaymentType.RAZORPAY);
             } else {
                 invoice.setStatus(PaidStatus.FAILED);
             }
@@ -79,6 +95,7 @@ public class RozorPayService {
     }
 
     public boolean verifyPaymentSignature(String orderId, String paymentId, String signature) {
+        if (testMode) return true; // auto-verify in test mode
         try {
             JSONObject options = new JSONObject();
             options.put("razorpay_order_id", orderId);
@@ -93,6 +110,7 @@ public class RozorPayService {
     }
 
     public boolean verifyWebhookSignature(String payload, String signature) {
+        if (testMode) return true;
         try {
             Utils.verifyWebhookSignature(payload, signature, keySecret);
             return true;

@@ -27,8 +27,8 @@ public class UserPaymentStatusService {
 
         entity.setUserId(dto.getUserId());
         entity.setPlanName(dto.getPlanName());
-        entity.setStartDate(LocalDate.now()); // ✅ Start today
-        entity.setEndDate(calculateEndDate(dto.getPlanName(), entity.getStartDate())); // ✅ Auto endDate
+        entity.setStartDate(LocalDate.now()); // Start today
+        entity.setEndDate(calculateEndDate(dto.getPlanName(), entity.getStartDate())); // Auto endDate
         entity.setActive(true);
 
         UserPaymentStatus saved = repository.save(entity);
@@ -42,7 +42,7 @@ public class UserPaymentStatusService {
         if (optional.isPresent()) {
             UserPaymentStatus entity = optional.get();
 
-            // ✅ Auto deactivate if expired
+            // Auto deactivate if expired
             if (LocalDate.now().isAfter(entity.getEndDate())) {
                 entity.setActive(false);
                 repository.save(entity);
@@ -66,7 +66,7 @@ public class UserPaymentStatusService {
         return dto;
     }
 
-    /** ✅ Auto calculate subscription end date based on planName */
+    /** Auto calculate subscription end date based on planName */
     private LocalDate calculateEndDate(String planName, LocalDate startDate) {
         switch (planName.toUpperCase()) {
             case "BASIC":    return startDate.plusDays(30);

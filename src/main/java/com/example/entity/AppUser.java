@@ -26,7 +26,12 @@ public class AppUser {
     public AppUser() {
     }
 
-    public AppUser(Long id, String name, String email, String password, Role role, Boolean isActive) {
+    public AppUser(Long id,
+                   String name,
+                   String email,
+                   String password,
+                   Role role,
+                   Boolean isActive) {
         this.id = id;
         this.name = name;
         this.email = email;
@@ -34,8 +39,6 @@ public class AppUser {
         this.role = role;
         this.isActive = isActive;
     }
-
-    // Getters and Setters
 
     public Long getId() {
         return id;

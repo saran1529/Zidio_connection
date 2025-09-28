@@ -19,7 +19,6 @@ public class PaymentController {
         this.invoiceService = invoiceService;
     }
 
-    /** ✅ Create Razorpay order */
     @PostMapping("/create-order")
     public ResponseEntity<Map<String, Object>> createOrder(@RequestBody Invoice invoice) throws Exception {
         Invoice updatedInvoice = invoiceService.createOrderAndAttachToInvoice(invoice);
@@ -32,7 +31,6 @@ public class PaymentController {
         return ResponseEntity.ok(resp);
     }
 
-    /** ✅ Verify payment */
     @PostMapping("/verify")
     public ResponseEntity<Map<String, Object>> verifyPayment(
             @RequestParam String orderId,

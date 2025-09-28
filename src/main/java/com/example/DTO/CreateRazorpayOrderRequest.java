@@ -3,11 +3,11 @@ package com.example.DTO;
 import java.util.Map;
 
 public class CreateRazorpayOrderRequest {
-    private Integer amount;        // amount in paise (e.g. ₹500 = 50000)
-    private String receipt;        // receipt number/string
-    private String userEmail;      // user’s email
-    private Long invoiceId;        // optional: link to invoice
-    private Map<String, String> notes; // optional: extra notes
+    private Integer amount;
+    private String receipt;
+    private String userEmail;
+    private Long invoiceId;
+    private Map<String, String> notes;
 
     public Integer getAmount() {
         return amount;

@@ -9,22 +9,23 @@ public class AdminUserDTO {
 
     public AdminUserDTO() {}
 
-    // Constructor with password
-    public AdminUserDTO(Long id, String username, String name, String password) {
+    public AdminUserDTO(Long id,
+                        String username,
+                        String name,
+                        String password) {
         this.id = id;
         this.username = username;
         this.name = name;
         this.password = password;
     }
 
-    // Constructor without password (optional)
-    public AdminUserDTO(Long id, String username, String name) {
+    public AdminUserDTO(Long id,
+                        String username,
+                        String name) {
         this.id = id;
         this.username = username;
         this.name = name;
     }
-
-    // Getters & Setters
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

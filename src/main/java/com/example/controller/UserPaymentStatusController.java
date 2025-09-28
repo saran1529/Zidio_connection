@@ -17,14 +17,12 @@ public class UserPaymentStatusController {
         this.userPaymentStatusService = userPaymentStatusService;
     }
 
-    // ✅ Assign subscription plan to user
     @PostMapping
     public ResponseEntity<SubscriptionPlanDTO> assign(@RequestBody SubscriptionPlanDTO dto) {
         SubscriptionPlanDTO result = userPaymentStatusService.assignSubscriptionPlan(dto);
         return ResponseEntity.ok(result);
     }
 
-    // ✅ Get subscription status by user ID
     @GetMapping("/{userId}")
     public ResponseEntity<Optional<SubscriptionPlanDTO>> getStatus(@PathVariable Long userId) {
         Optional<SubscriptionPlanDTO> result = userPaymentStatusService.getStatusByUserId(userId);

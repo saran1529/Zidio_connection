@@ -21,7 +21,7 @@ public class StudentService {
         this.studentRepository = studentRepository;
     }
 
-    /** ✅ Get student by ID */
+    /** Get student by ID */
     public StudentDTO getStudentById(Long id) {
         Optional<Student> optional = studentRepository.findById(id);
         if (optional.isEmpty()) {
@@ -30,7 +30,7 @@ public class StudentService {
         return mapToDTO(optional.get());
     }
 
-    /** ✅ Get student by email */
+    /** Get student by email */
     public StudentDTO getStudentByEmail(String email) {
         Optional<Student> optional = studentRepository.findByEmail(email);
         if (optional.isEmpty()) {
@@ -39,7 +39,7 @@ public class StudentService {
         return mapToDTO(optional.get());
     }
 
-    /** ✅ Create a new student */
+    /** Create a new student */
     public StudentDTO createStudent(StudentDTO dto) {
         Student student = new Student();
         student.setName(dto.getName());
@@ -51,7 +51,7 @@ public class StudentService {
         return mapToDTO(saved);
     }
 
-    /** ✅ Update an existing student */
+    /** Update an existing student */
     public StudentDTO updateStudent(Long id, StudentDTO dto) {
         Optional<Student> optional = studentRepository.findById(id);
         if (optional.isEmpty()) {
@@ -68,7 +68,7 @@ public class StudentService {
         return mapToDTO(updated);
     }
 
-    /** ✅ Delete a student by ID */
+    /** Delete a student by ID */
     public boolean deleteStudent(Long id) {
         if (!studentRepository.existsById(id)) {
             return false;
@@ -77,7 +77,7 @@ public class StudentService {
         return true;
     }
 
-    /** ✅ Helper method to convert Student to StudentDTO */
+    /** Helper method to convert Student to StudentDTO */
     private StudentDTO mapToDTO(Student student) {
         StudentDTO dto = new StudentDTO();
         dto.setId(student.getId());

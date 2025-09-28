@@ -5,6 +5,7 @@ import com.example.enums.JobType;
 import com.example.repository.JobPostRepository;
 import com.example.service.JobPostService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,14 +22,27 @@ public class JobPostController {
         this.jobPostRepository = jobPostRepository;
     }
 
+    @PreAuthorize("hasAnyRole('RECRUITER','ADMIN')")
     @PostMapping
     public ResponseEntity<JobPostDTO> createJob(@RequestBody JobPostDTO dto) {
         return ResponseEntity.ok(jobPostService.postJob(dto));
     }
 
+    @GetMapping
+    public ResponseEntity<List<JobPostDTO>> getAllJobs() {
+        return ResponseEntity.ok(jobPostService.getAllJobPosts());
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<JobPostDTO> getJobById(@PathVariable Long id) {
+        JobPostDTO dto = jobPostService.getJobPostById(id);
+        return dto != null ? ResponseEntity.ok(dto) : ResponseEntity.notFound().build();
+    }
+
+    @PreAuthorize("hasAnyRole('RECRUITER','ADMIN')")
     @GetMapping("/recruiter")
     public ResponseEntity<List<JobPostDTO>> getByPostedEmail(@RequestParam String email) {
-        return ResponseEntity.ok(jobPostService.getByPostedByEmail(email));
+        return ResponseEntity.ok(jobPostService.getByRecruiterEmail(email));
     }
 
     @GetMapping("/jobTitle")
@@ -46,8 +60,26 @@ public class JobPostController {
         return ResponseEntity.ok(jobPostService.getByCompanyName(companyName));
     }
 
+    @PreAuthorize("hasAnyRole('RECRUITER','ADMIN')")
     @GetMapping("/internal/count")
     public ResponseEntity<Long> countJobPost() {
         return ResponseEntity.ok(jobPostRepository.count());
+    }
+
+    @PreAuthorize("hasAnyRole('RECRUITER','ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteJobPost(@PathVariable Long id) {
+        // First, get the job title to include in the message
+        JobPostDTO job = jobPostService.getJobPostById(id);
+        if (job == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        // Delete the job
+        jobPostService.deleteJobPost(id);
+
+        // Return custom success message
+        String message = "Job '" + job.getJobTitle() + "' has been deleted successfully!";
+        return ResponseEntity.ok(message);
     }
 }

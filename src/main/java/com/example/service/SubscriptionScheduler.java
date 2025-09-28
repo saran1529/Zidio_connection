@@ -17,7 +17,7 @@ public class SubscriptionScheduler {
         this.repository = repository;
     }
 
-    /** ✅ Run every day at midnight (00:00) */
+    /** Run every day at midnight (00:00) */
     @Scheduled(cron = "0 0 0 * * ?")
     public void deactivateExpiredPlans() {
         List<UserPaymentStatus> all = repository.findAll();
@@ -29,6 +29,6 @@ public class SubscriptionScheduler {
                 repository.save(plan);
             }
         }
-        System.out.println("✅ Subscription expiry check completed at: " + today);
+        System.out.println(" Subscription expiry check completed at: " + today);
     }
 }

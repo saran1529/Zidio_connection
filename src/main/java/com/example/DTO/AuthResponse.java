@@ -2,8 +2,8 @@ package com.example.DTO;
 
 public class AuthResponse {
     private String name;
-    private String username;   // instead of email
-    private String role;       // from userRole in entity
+    private String username;
+    private String role;
     private String message;
     private String token;
 
@@ -21,7 +21,6 @@ public class AuthResponse {
         this.token = token;
     }
 
-    // Getters & Setters
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
 

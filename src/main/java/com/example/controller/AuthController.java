@@ -1,8 +1,6 @@
 package com.example.controller;
 
-import com.example.DTO.LoginRequest;
-import com.example.DTO.RegisterRequest;
-import com.example.DTO.AuthResponse;
+import com.example.DTO.*;
 import com.example.service.AuthService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +16,7 @@ public class AuthController {
         this.authService = authService;
     }
 
-    /** 🔹 Register a new user */
+    //  Single register method – service handles Admin/User distinction
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
@@ -29,8 +27,6 @@ public class AuthController {
                     .body(new ErrorResponse(ex.getMessage()));
         }
     }
-
-    /** 🔹 Login an existing user */
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try{
@@ -41,7 +37,18 @@ public class AuthController {
                     .body(new ErrorResponse(ex.getMessage()));
         }
 }
-        // Inner class for error responses
+
+    @PostMapping("/register/recruiter")
+    public ResponseEntity<?> registerRecruiter(@RequestBody RecruiterRegisterRequestDTO requestDTO) {
+        try {
+            RecruiterDTO dto = authService.registerRecruiter(requestDTO);
+            return ResponseEntity.ok(dto);
+        } catch (RuntimeException ex) {
+            return ResponseEntity.status(HttpStatus.CONFLICT)
+                    .body(new ErrorResponse(ex.getMessage()));
+        }
+    }
+
         public static class ErrorResponse {
             private String error;
 

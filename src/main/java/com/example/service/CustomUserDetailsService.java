@@ -21,13 +21,10 @@ public class CustomUserDetailsService implements UserDetailsService {
     public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
         AppUser user = userRepo.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found"));
-
-        // Check if user is active (optional)
         if (user.getIsActive() != null && !user.getIsActive()) {
             throw new UsernameNotFoundException("User is disabled");
         }
 
-        // Make sure password is not null
         String password = user.getPassword();
         if (password == null || password.isEmpty()) {
             throw new UsernameNotFoundException("User has no password set");

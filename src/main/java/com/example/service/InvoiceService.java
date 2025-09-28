@@ -27,36 +27,32 @@ public class InvoiceService {
     public Invoice createOrderAndAttachToInvoice(Invoice invoice) throws Exception {
         Invoice saved = invoiceRepository.save(invoice);
 
-        // ✅ Get Razorpay Order
-        Order order = razorpayService.createOrder(
-                saved.getAmount().intValue(),
-                "invoice_" + saved.getId(),
-                Map.of("invoiceId", String.valueOf(saved.getId()))
-        );
+        //  FIX: Pass Invoice directly instead of amount/receipt/notes
+        Invoice updated = razorpayService.createOrder(saved);
 
-
-        saved.setRazorpayOrderId(order.get("id"));
-        saved.setStatus(PaidStatus.PENDING);
+        //  Update DB with Razorpay OrderId and status
+        saved.setRazorpayOrderId(updated.getRazorpayOrderId());
+        saved.setStatus(updated.getStatus());
 
         return invoiceRepository.save(saved);
     }
 
-    /** ✅ Fetch invoice by ID */
+    /**  Fetch invoice by ID */
     public Optional<Invoice> getInvoiceById(Long id) {
         return invoiceRepository.findById(id);
     }
 
-    /** ✅ Fetch all invoices by user email */
+    /**  Fetch all invoices by user email */
     public List<Invoice> getInvoicesByUserEmail(String email) {
         return invoiceRepository.findByUserEmail(email);
     }
 
-    /** ✅ Fetch all invoices */
+    /**  Fetch all invoices */
     public List<Invoice> getAllInvoices() {
         return invoiceRepository.findAll();
     }
 
-    /** ✅ Update an invoice by ID and user email */
+    /**  Update an invoice by ID and user email */
     public Invoice updateInvoice(Long id, String email, Invoice updatedInvoice) {
         Optional<Invoice> optional = invoiceRepository.findById(id);
         if (optional.isEmpty()) {
@@ -71,35 +67,35 @@ public class InvoiceService {
         // Update fields
         existing.setAmount(updatedInvoice.getAmount());
         existing.setStatus(updatedInvoice.getStatus());
-        existing.setPaymentMethod(updatedInvoice.getPaymentMethod());
+        existing.setPaymentType(updatedInvoice.getPaymentType());
         existing.setInvoiceNumber(updatedInvoice.getInvoiceNumber());
         // update other fields if needed
 
         return invoiceRepository.save(existing);
     }
 
-    /** ✅ Verify Razorpay payment and update invoice in DB */
+    /**  Verify Razorpay payment and update invoice in DB */
     public Invoice verifyAndMarkAsPaid(String orderId, String paymentId, String signature, Invoice invoice) {
         Invoice updatedInvoice = razorpayService.verifyPayment(orderId, paymentId, signature, invoice);
 
         // Always record payment attempt
-        updatedInvoice.setPaymentMethod(PaymentType.RAZORPAY);
+        updatedInvoice.setPaymentType(PaymentType.RAZORPAY);
         updatedInvoice.setPaymentId(paymentId);
 
         return invoiceRepository.save(updatedInvoice);
     }
 
-    /** ✅ Force mark as paid (fallback, e.g. webhook/manual) */
+    /**  Force mark as paid (fallback, e.g. webhook/manual) */
     public void markAsPaid(Long invoiceId, String paymentId, PaymentType type) {
         invoiceRepository.findById(invoiceId).ifPresent(inv -> {
             inv.setStatus(PaidStatus.PAID);
             inv.setPaymentId(paymentId);
-            inv.setPaymentMethod(type);
+            inv.setPaymentType(type);
             invoiceRepository.save(inv);
         });
     }
 
-    /** ✅ Delete an invoice by ID and user email */
+    /**  Delete an invoice by ID and user email */
     public void deleteInvoice(Long id, String email) {
         invoiceRepository.findById(id).ifPresent(inv -> {
             if (inv.getUserEmail().equals(email)) {

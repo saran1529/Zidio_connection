@@ -1,8 +1,10 @@
 package com.example.controller;
 
+import com.example.DTO.RecruiterDTO;
 import com.example.entity.Recruiter;
 import com.example.service.RecruiterService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,44 +19,41 @@ public class RecruiterController {
         this.recruiterService = recruiterService;
     }
 
-    // ✅ Create recruiter
-    @PostMapping
-    public ResponseEntity<Recruiter> createRecruiter(@RequestBody Recruiter recruiter) {
-        return ResponseEntity.ok(recruiterService.createRecruiter(recruiter));
+    @PreAuthorize("hasAnyRole('RECRUITER','ADMIN')")
+    @PostMapping(consumes = "application/json", produces = "application/json")
+    public ResponseEntity<RecruiterDTO> createRecruiter(@RequestBody RecruiterDTO dto) {
+        RecruiterDTO saved = recruiterService.createRecruiter(dto);
+        return ResponseEntity.ok(saved);
     }
 
-    // ✅ Get recruiter by ID
     @GetMapping("/{id}")
-    public ResponseEntity<Recruiter> getRecruiterById(@PathVariable Long id) {
+    public ResponseEntity<RecruiterDTO> getRecruiterById(@PathVariable Long id) {
         return recruiterService.getRecruiterById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ Get recruiter by email
     @GetMapping("/email/{email}")
-    public ResponseEntity<Recruiter> getRecruiterByEmail(@PathVariable String email) {
+    public ResponseEntity<RecruiterDTO> getRecruiterByEmail(@PathVariable String email) {
         return recruiterService.getRecruiterByEmail(email)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    // ✅ Get all recruiters
     @GetMapping
-    public ResponseEntity<List<Recruiter>> getAllRecruiters() {
+    public ResponseEntity<List<RecruiterDTO>> getAllRecruiters() {
         return ResponseEntity.ok(recruiterService.getAllRecruiters());
     }
 
-    // ✅ Update recruiter
     @PutMapping("/{id}")
-    public ResponseEntity<Recruiter> updateRecruiter(
+    public ResponseEntity<RecruiterDTO> updateRecruiter(
             @PathVariable Long id,
-            @RequestBody Recruiter recruiter
+            @RequestBody RecruiterDTO dto
     ) {
-        return ResponseEntity.ok(recruiterService.updateRecruiter(id, recruiter));
+        RecruiterDTO updated = recruiterService.updateRecruiter(id, dto);
+        return ResponseEntity.ok(updated);
     }
 
-    // ✅ Delete recruiter
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteRecruiter(@PathVariable Long id) {
         recruiterService.deleteRecruiter(id);

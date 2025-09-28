@@ -8,14 +8,18 @@ public class ApplicationDTO {
     private Long studentId;
     private Long jobId;
     private String resumeURL;
-    private Status status;
+    private String status;
     private Date appliedDate;
 
     public ApplicationDTO() {
-        // No-arg constructor
     }
 
-    public ApplicationDTO(Long id, Long studentId, Long jobId, String resumeURL, Status status, Date appliedDate) {
+    public ApplicationDTO(Long id,
+                          Long studentId,
+                          Long jobId,
+                          String resumeURL,
+                          String status,
+                          Date appliedDate) {
         this.id = id;
         this.studentId = studentId;
         this.jobId = jobId;
@@ -56,11 +60,11 @@ public class ApplicationDTO {
         this.resumeURL = resumeURL;
     }
 
-    public Status getStatus() {
+    public String getStatus() {
         return status;
     }
 
-    public void setStatus(Status status) {
+    public void setStatus(String status) {
         this.status = status;
     }
 

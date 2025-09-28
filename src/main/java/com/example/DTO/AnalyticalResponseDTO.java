@@ -7,22 +7,28 @@ public class AnalyticalResponseDTO {
     private Long auth;
     private Long applications;
     private Long admins;
-    private String fileUpload;
-    private String email;
+    private Long fileUploads;
+    private Long emails;
 
     public AnalyticalResponseDTO() {
-        // No-arg constructor
     }
 
-    public AnalyticalResponseDTO(Long students, Long recruiters, Long jobPosts, Long auth, Long applications, Long admins, String fileUpload, String email) {
+    public AnalyticalResponseDTO(Long students,
+                                 Long recruiters,
+                                 Long jobPosts,
+                                 Long auth,
+                                 Long applications,
+                                 Long admins,
+                                 Long fileUploads,
+                                 Long emails) {
         this.students = students;
         this.recruiters = recruiters;
         this.jobPosts = jobPosts;
         this.auth = auth;
         this.applications = applications;
         this.admins = admins;
-        this.fileUpload = fileUpload;
-        this.email = email;
+        this.fileUploads = fileUploads;
+        this.emails = emails;
     }
 
     public Long getStudents() {
@@ -73,19 +79,19 @@ public class AnalyticalResponseDTO {
         this.admins = admins;
     }
 
-    public String getFileUpload() {
-        return fileUpload;
+    public Long getFileUploads() {
+        return fileUploads;
     }
 
-    public void setFileUpload(String fileUpload) {
-        this.fileUpload = fileUpload;
+    public void setFileUploads(Long fileUploads) {
+        this.fileUploads = fileUploads;
     }
 
-    public String getEmail() {
-        return email;
+    public Long getEmails() {
+        return emails;
     }
 
-    public void setEmail(String email) {
-        this.email = email;
+    public void setEmails(Long emails) {
+        this.emails = emails;
     }
 }

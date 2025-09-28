@@ -1,25 +1,11 @@
 package com.example.DTO;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-
-public class StudentDTO {
-    private Long id;
+public class UpdateAppUserRequest {
     private String name;
     private String email;
-    private String phone;
-
-    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
-    private String password;
-
-    public StudentDTO() {}
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
+    private String role; // e.g. "ROLE_USER" or "USER"
+    private Boolean isActive;
+    private String password; // plain text if user wants to reset
 
     public String getName() {
         return name;
@@ -37,12 +23,20 @@ public class StudentDTO {
         this.email = email;
     }
 
-    public String getPhone() {
-        return phone;
+    public String getRole() {
+        return role;
     }
 
-    public void setPhone(String phone) {
-        this.phone = phone;
+    public void setRole(String role) {
+        this.role = role;
+    }
+
+    public Boolean getActive() {
+        return isActive;
+    }
+
+    public void setActive(Boolean active) {
+        isActive = active;
     }
 
     public String getPassword() {

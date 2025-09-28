@@ -7,7 +7,7 @@ import org.springframework.web.client.RestTemplate;
 /**
  * Configuration class for defining the RestTemplate bean.
  */
-@SuppressWarnings("unused") // Suppress warning if not used yet
+// Suppress warning if not used yet
 @Configuration
 public class RestTemplateConfig {
 

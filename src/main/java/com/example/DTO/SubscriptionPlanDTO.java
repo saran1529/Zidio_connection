@@ -13,7 +13,6 @@ public class SubscriptionPlanDTO {
     private LocalDate endDate;
     private boolean active;
 
-    // 🆕 Computed field (not stored in DB, only for API response)
     private Long remainingDays;
 
     public SubscriptionPlanDTO() {}
@@ -37,47 +36,83 @@ public class SubscriptionPlanDTO {
         this.remainingDays = calculateRemainingDays(); // auto-set
     }
 
-    // --- Getters & Setters ---
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Long getId() {
+        return id;
+    }
 
-    public Long getUserId() { return userId; }
-    public void setUserId(Long userId) { this.userId = userId; }
+    public void setId(Long id) {
+        this.id = id;
+    }
 
-    public String getPlanName() { return planName; }
-    public void setPlanName(String planName) { this.planName = planName; }
+    public Long getUserId() {
+        return userId;
+    }
 
-    public Double getPrice() { return price; }
-    public void setPrice(Double price) { this.price = price; }
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
 
-    public Integer getDuration() { return duration; }
-    public void setDuration(Integer duration) { this.duration = duration; }
+    public String getPlanName() {
+        return planName;
+    }
 
-    public LocalDate getStartDate() { return startDate; }
+    public void setPlanName(String planName) {
+        this.planName = planName;
+    }
+
+    public Double getPrice() {
+        return price;
+    }
+
+    public void setPrice(Double price) {
+        this.price = price;
+    }
+
+    public Integer getDuration() {
+        return duration;
+    }
+
+    public void setDuration(Integer duration) {
+        this.duration = duration;
+    }
+
+    public LocalDate getStartDate() {
+        return startDate;
+    }
+
     public void setStartDate(LocalDate startDate) {
         this.startDate = startDate;
-        this.remainingDays = calculateRemainingDays();
     }
 
-    public LocalDate getEndDate() { return endDate; }
+    public LocalDate getEndDate() {
+        return endDate;
+    }
+
     public void setEndDate(LocalDate endDate) {
         this.endDate = endDate;
-        this.remainingDays = calculateRemainingDays();
     }
 
-    public boolean isActive() { return active; }
-    public void setActive(boolean active) { this.active = active; }
+    public boolean isActive() {
+        return active;
+    }
+
+    public void setActive(boolean active) {
+        this.active = active;
+    }
+
+    public void setRemainingDays(Long remainingDays) {
+        this.remainingDays = remainingDays;
+    }
 
     public Long getRemainingDays() {
         return calculateRemainingDays();
     }
 
-    // --- Helper Method ---
     private Long calculateRemainingDays() {
         if (endDate == null) return null;
         LocalDate today = LocalDate.now();
         if (today.isAfter(endDate)) {
-            return 0L; // already expired
+            return 0L;
         }
         return ChronoUnit.DAYS.between(today, endDate);
     }

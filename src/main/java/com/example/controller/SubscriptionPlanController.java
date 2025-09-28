@@ -10,9 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * REST controller for managing subscription plans.
- */
 @RestController
 @RequestMapping("/api/subscription")
 public class SubscriptionPlanController {
@@ -24,9 +21,6 @@ public class SubscriptionPlanController {
         this.subscriptionPlanService = subscriptionPlanService;
     }
 
-    /**
-     * ✅ Get all subscription plans
-     */
     @GetMapping
     public ResponseEntity<List<SubscriptionPlanDTO>> getAll() {
         List<SubscriptionPlanDTO> plans = subscriptionPlanService.list().stream()
@@ -44,16 +38,12 @@ public class SubscriptionPlanController {
         return ResponseEntity.ok(plans);
     }
 
-    /**
-     * ✅ Create a new subscription plan
-     */
     @PostMapping
     public ResponseEntity<SubscriptionPlanDTO> create(@RequestBody SubscriptionPlanDTO dto) {
         SubscriptionPlan entity = new SubscriptionPlan();
         entity.setName(dto.getPlanName());
         entity.setPrice(dto.getPrice());
         entity.setDurationDays(dto.getDuration());
-        // map other fields if needed
 
         SubscriptionPlan saved = subscriptionPlanService.create(entity);
 
@@ -62,7 +52,6 @@ public class SubscriptionPlanController {
         createdDto.setPlanName(saved.getName());
         createdDto.setPrice(saved.getPrice());
         createdDto.setDuration(saved.getDurationDays());
-        // map other fields if needed
 
         return ResponseEntity.ok(createdDto);
     }

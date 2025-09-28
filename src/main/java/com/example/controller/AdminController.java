@@ -1,19 +1,21 @@
 package com.example.controller;
 
+import com.example.DTO.UpdateAppUserRequest;
 import com.example.entity.AdminUser;
 import com.example.entity.AppUser;
 import com.example.service.AdminService;
+import org.springframework.security.core.Authentication;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
-/**
- * Controller for Admin-specific operations.
- * Base path: /api/admin
- */
 @RestController
 @RequestMapping("/api/admin")
+@PreAuthorize("hasRole('ADMIN')")
 public class AdminController {
 
     private final AdminService adminService;
@@ -22,13 +24,12 @@ public class AdminController {
         this.adminService = adminService;
     }
 
-    /** ✅ Get all users (students, recruiters, admins) */
+    // ---------------- USER ENDPOINTS ----------------
     @GetMapping("/users")
     public ResponseEntity<List<AppUser>> getAllUsers() {
         return ResponseEntity.ok(adminService.getAllUsers());
     }
 
-    /** ✅ Get user by ID */
     @GetMapping("/users/{id}")
     public ResponseEntity<AppUser> getUserById(@PathVariable Long id) {
         return adminService.getUserById(id)
@@ -36,28 +37,97 @@ public class AdminController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
-    /** ✅ Delete a user */
     @DeleteMapping("/users/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<String> deleteUser(@PathVariable Long id) {
         boolean deleted = adminService.deleteUser(id);
         if (deleted) {
-            return ResponseEntity.noContent().build();
+            return ResponseEntity.ok("User with id" + id + "deleted successfully");
         }
-        return ResponseEntity.notFound().build();
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
     }
 
-    /** ✅ Update admin profile */
-    @PutMapping("/profile")
-    public ResponseEntity<AdminUser> updateAdminProfile(@RequestBody AdminUser admin) {
-        AdminUser updated = adminService.updateAdminProfile(admin);
-        return ResponseEntity.ok(updated);
+    @PutMapping("/users/{id}")
+    public ResponseEntity<?> updateUserById(
+            @PathVariable Long id,
+            @RequestBody UpdateAppUserRequest request) {
+
+        Optional<AppUser> updatedUser = adminService.updateUser(id, request); // handled in service
+        if (updatedUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+        }
+        return ResponseEntity.ok(updatedUser.get());
     }
 
-    /** ✅ Get admin profile by email */
-    @GetMapping("/profile/{email}")
-    public ResponseEntity<AdminUser> getAdminProfile(@PathVariable String email) {
+    // ---------------- LOGGED-IN ADMIN PROFILE ----------------
+    @GetMapping("/profile")
+    public ResponseEntity<AdminUser> getCurrentAdminProfile(Authentication authentication) {
+        String email = authentication.getName(); // extracts from JWT (subject)
         return adminService.getAdminByEmail(email)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    @PutMapping("/profile")
+    public ResponseEntity<?> updateCurrentAdminProfile(
+            Authentication authentication,
+            @RequestBody AdminUser adminDetails) {
+
+        String email = authentication.getName();
+        Optional<AdminUser> updatedAdmin = adminService.getAdminByEmail(email)
+                .map(existing -> {
+                    if (adminDetails.getName() != null) existing.setName(adminDetails.getName());
+                    if (adminDetails.getPassword() != null && !adminDetails.getPassword().isBlank()) {
+                        existing.setPassword(adminDetails.getPassword());
+                    }
+                    if (adminDetails.getUserRole() != null) existing.setUserRole(adminDetails.getUserRole());
+                    if (adminDetails.getIsActive() != null) existing.setIsActive(adminDetails.getIsActive());
+                    return adminService.saveAdmin(existing);
+                });
+
+        if (updatedAdmin.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Admin not found");
+        }
+        return ResponseEntity.ok(updatedAdmin.get());
+    }
+
+    // ---------------- ADMIN MANAGEMENT ----------------
+    @GetMapping("/admins")
+    public ResponseEntity<List<AdminUser>> getAllAdmins() {
+        return ResponseEntity.ok(adminService.getAllAdmins());
+    }
+
+    @GetMapping("/admins/{id}")
+    public ResponseEntity<AdminUser> getAdminById(@PathVariable Long id) {
+        return adminService.getAdminById(id)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    @GetMapping("/admins/email/{email}")
+    public ResponseEntity<AdminUser> getAdminByEmail(@PathVariable String email) {
+        return adminService.getAdminByEmail(email)
+                .map(ResponseEntity::ok)
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body(null));
+    }
+
+    @PutMapping("/admins/{id}")
+    public ResponseEntity<?> updateAdminById(
+            @PathVariable Long id,
+            @RequestBody AdminUser adminDetails) {
+
+        Optional<AdminUser> updatedAdmin = adminService.updateAdminById(id, adminDetails);
+        if (updatedAdmin.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Admin not found");
+        }
+        return ResponseEntity.ok(updatedAdmin.get());
+    }
+
+    @DeleteMapping("/admins/{id}")
+    public ResponseEntity<String> deleteAdmin(@PathVariable Long id) {
+        boolean deleted = adminService.deleteAdmin(id);
+        if (deleted) {
+            return ResponseEntity.ok("Admin with id" + id + "deleted successfully.");
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Admin not found");
     }
 }

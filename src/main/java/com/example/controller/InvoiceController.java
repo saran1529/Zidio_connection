@@ -6,6 +6,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/invoices")
@@ -17,18 +18,21 @@ public class InvoiceController {
         this.invoiceService = invoiceService;
     }
 
-    @PostMapping("/user/{email}")
-    public ResponseEntity<Invoice> createInvoice(@PathVariable String email, @RequestBody Invoice invoice) {
+    // ---------------- Create invoice for a specific user ----------------
+    @PostMapping
+    public ResponseEntity<Object> createInvoice(@RequestBody Invoice invoice) {
         try {
-            invoice.setUserEmail(email);
             Invoice savedInvoice = invoiceService.createOrderAndAttachToInvoice(invoice);
             return ResponseEntity.ok(savedInvoice);
         } catch (Exception e) {
-            // Handle exception appropriately
-            return ResponseEntity.status(500).build();
+            e.printStackTrace(); // log in console
+            return ResponseEntity.status(500).body(
+                    Map.of("error", "Internal Server Error", "message", e.getMessage())
+            );
         }
     }
 
+    // Get invoice by ID
     @GetMapping("/{id}")
     public ResponseEntity<Invoice> getInvoiceById(@PathVariable Long id) {
         return invoiceService.getInvoiceById(id)
@@ -36,16 +40,19 @@ public class InvoiceController {
                 .orElse(ResponseEntity.notFound().build());
     }
 
+    // Get all invoices by user email
     @GetMapping("/user/{email}")
     public ResponseEntity<List<Invoice>> getInvoicesByUserEmail(@PathVariable String email) {
         return ResponseEntity.ok(invoiceService.getInvoicesByUserEmail(email));
     }
 
+    // Get all invoices
     @GetMapping
     public ResponseEntity<List<Invoice>> getAllInvoices() {
         return ResponseEntity.ok(invoiceService.getAllInvoices());
     }
 
+    // Update invoice
     @PutMapping("/{id}/user/{email}")
     public ResponseEntity<Invoice> updateInvoice(
             @PathVariable Long id,
@@ -54,6 +61,7 @@ public class InvoiceController {
         return ResponseEntity.ok(invoiceService.updateInvoice(id, email, invoice));
     }
 
+    // Delete invoice
     @DeleteMapping("/{id}/user/{email}")
     public ResponseEntity<Void> deleteInvoice(@PathVariable Long id, @PathVariable String email) {
         invoiceService.deleteInvoice(id, email);

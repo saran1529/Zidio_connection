@@ -25,10 +25,8 @@ public class RozorPayController {
         this.razorpayService = razorpayService;
     }
 
-    /** ✅ Create Razorpay order + Invoice (DB-centric flow) */
     @PostMapping("/order")
     public ResponseEntity<Map<String, Object>> createOrder(@RequestBody Invoice invoice) throws Exception {
-        // Save invoice + create order (handled in InvoiceService)
         Invoice updatedInvoice = invoiceService.createOrderAndAttachToInvoice(invoice);
 
         Map<String, Object> resp = new HashMap<>();
@@ -40,7 +38,6 @@ public class RozorPayController {
         return ResponseEntity.ok(resp);
     }
 
-    /** ✅ Verify payment and mark invoice as PAID */
     @PostMapping("/verify")
     public ResponseEntity<Map<String, Object>> verifyPayment(@RequestBody VerifyPaymentRequest req) {
         Invoice invoice = new Invoice();
@@ -61,7 +58,6 @@ public class RozorPayController {
         return ResponseEntity.ok(resp);
     }
 
-    /** ✅ Webhook from Razorpay Dashboard */
     @PostMapping("/webhook")
     public ResponseEntity<Void> handleWebhook(@RequestHeader("X-Razorpay-Signature") String signature,
                                               @RequestBody String payload) {
